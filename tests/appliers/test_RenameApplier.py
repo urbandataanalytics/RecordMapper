@@ -135,8 +135,3 @@ class test_RenameApplier(unittest.TestCase):
         # Assert
         self.assertDictEqual(res, expected_dict)
 
-
-
-
-
-    
