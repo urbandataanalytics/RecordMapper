@@ -1,48 +1,61 @@
+from typing import List, Union
 
-from SwissKnife.avro.types import Record, Variables, NoDefault
+from collections import namedtuple
+
+from RecordMapper.types import Record, Variables, NoDefault
+
+RenameTuple = namedtuple("RenameTuple", ['new_key', 'type'])
 
 class RenameApplier(object):
 
-    def __init__(self, schema: dict):
+    def __init__(self, *schemas: List[dict]):
 
-        self.rename_dict = self.create_rename_dict(schema)
+        self.rename_schemas = dict([self.create_rename_dict(schema) for schema in schemas])
 
     @staticmethod
-    def create_rename_dict(schema: dict) -> dict:
-        """
-        Creates a dict that maps a name with the correct one.
-        :param schema: The provided schema.
-        :type schema: dict
-        :return: A dict with the map "name -> correct_name". It maps
-        either a "name -> name" or an "alias -> name" pair.
-        :rtype: dict
-        """
+    def create_rename_dict(schema: dict) -> (str, dict):
+
+        schema_name = schema["name"]
         rename_dict = {}
+
         for field in schema[Variables.FIELDS]:
             field_name = field[Variables.NAME]
+            field_type = field[Variables.TYPE]
             # Rename field_name to itself
-            rename_dict[field_name] = field_name
+            rename_dict[field_name] = RenameTuple(field_name, field_type)
             # rename aliases
             if Variables.ALIASES in field:
                 for alias in field[Variables.ALIASES]:
-                    rename_dict[alias] = field_name
-        return rename_dict
+                    rename_dict[alias] = RenameTuple(field_name, field_type)
 
-    def apply(self, record: Record) -> Record:
-        """
-        Transforms a record to another one with correct names: If a record field
-        uses an alias, it will be changed to the correct name using the avro schema as reference.
-        Also, a field that is not in the avro schema will be removed.
-        :param record: The input record.
-        :type record: Record
-        :return: A record with the correct field names and without invalid fields.
-        :rtype: Record
-        """
+        return schema_name, rename_dict
+
+    def apply(self, base_schema: str, record: Record) -> Record:
+
+        base_rename_schema = self.rename_schemas[base_schema]
+
         new_record = {}
+
+        # Rename each file of the original record
         for key, value in record.items():
-            # Remove not existing keys
-            if key not in self.rename_dict:
-                continue
-            new_key = self.rename_dict[key]
-            new_record[new_key] = value
+
+            # It gets the renameTuple or get a "dummy" one if it does not exist
+            renameTuple = base_rename_schema[key] if key in base_rename_schema else RenameTuple(key, None)
+
+            # It is a nested record. We will get the value recursively.
+            if renameTuple.type in self.rename_schemas:
+                new_value = self.apply(renameTuple.type, value)
+            # It is not a recognizable nested record
+            else:
+                new_value = value 
+
+            new_record[renameTuple.new_key] = new_value
+
         return new_record
+    
+    def is_a_nested_record(self, type_field: Union[str, list]) -> str:
+        if type_field is str:
+            return type_field if type_field in self.rename_schemas.keys() else None
+        if type_field is list:
+            record_types = [type_value for type_value in type_field if type_value in self.rename_schemas.keys()]
+            return record_types[0]

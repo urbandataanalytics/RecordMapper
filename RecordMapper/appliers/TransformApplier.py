@@ -1,7 +1,7 @@
 import re
 from typing import Callable
 
-from SwissKnife.avro.types import Record, Variables, NoDefault
+from RecordMapper.types import Record, Variables, NoDefault
 
 class TransformApplier(object):
 
