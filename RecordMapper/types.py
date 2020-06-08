@@ -19,3 +19,6 @@ class Variables:
     TRANSFORM = "transform"
     TYPE = "type"
     DEFAULT = "default"
+
+class InvalidTransformException(Exception):
+    pass

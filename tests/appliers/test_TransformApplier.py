@@ -2,6 +2,7 @@ import unittest
 
 from RecordMapper.appliers import TransformApplier
 from RecordMapper.appliers.TransformApplier import transform_functions
+from RecordMapper.types import InvalidTransformException
 
 class test_TransformApplier(unittest.TestCase):
     def test_get_transform_function(self):
@@ -48,34 +49,157 @@ class test_TransformApplier(unittest.TestCase):
         self.assertEqual(len(parsed_dict["field_5"]), 2)
 
 
-    # def test_basic_renaming(self):
+    def test_transform_with_one_phase(self):
 
-    #     # Arrange
-    #     test_schema = {
-    #         "type": "record",
-    #         "name": "ExampleBaseSchema",
-    #         "fields": [
-    #            {"name": "field_1", "type": "string"},
-    #            {"name": "field_renamed", "aliases": ["field_2"], "type": "int"}
-    #         ]
-    #     }
+        # Arrange
+        test_schema = {
+            "type": "record",
+            "name": "ExampleBaseSchema",
+            "fields": [
+               {"name": "field_1", "type": "string"},
+               {"name": "field_2", "type": "int"},
+               {"name": "field_3", "transform": "copyFrom(field_2)", "type": "int"}
+            ]
+        }
 
-    #     input_dict = {
-    #         "field_1": "hola",
-    #         "field_2": 56
-    #     }
-    #     expected_dict = {
-    #         "field_1": "hola",
-    #         "field_renamed": 56 
-    #     }
+        input_record = {
+            "field_1": "hola",
+            "field_2": 56
+        }
 
-    #     # Act
-    #     res = RenameApplier(test_schema).apply("ExampleBaseSchema", input_dict)
+        expected_record = {
+            "field_1": "hola",
+            "field_2": 56,
+            "field_3": 56
+        }
+
+        # Act
+        res = TransformApplier(test_schema).apply("ExampleBaseSchema", input_record)
         
-    #     # Assert
-    #     self.assertDictEqual(res, expected_dict)
+        # Assert
+        self.assertDictEqual(res, expected_record)
 
-    # def test_retain_fields_that_are_not_in_the_schema(self):
+
+    def test_custom_transform_with_one_phase(self):
+
+        # Arrange
+        test_schema = {
+            "type": "record",
+            "name": "ExampleBaseSchema",
+            "fields": [
+               {"name": "field_1", "type": "string"},
+               {"name": "field_2", "type": "int"},
+               {"name": "field_3", "transform": "tests.custom_functions_for_tests.sum(5)", "type": "int"}
+            ]
+        }
+
+        input_record = {
+            "field_1": "hola",
+            "field_2": 56,
+            "field_3": 7
+        }
+
+        expected_record = {
+            "field_1": "hola",
+            "field_2": 56,
+            "field_3": 12
+        }
+
+        # Act
+        res = TransformApplier(test_schema).apply("ExampleBaseSchema", input_record)
+        
+        # Assert
+        self.assertDictEqual(res, expected_record)
+
+    def test_invalid_transform_function_name(self):
+
+        # Arrange
+        test_schema = {
+            "type": "record",
+            "name": "ExampleBaseSchema",
+            "fields": [
+               {"name": "field_3", "transform": "tests.custom_functions_for_tests.nope(5)", "type": "int"}
+            ]
+        }
+
+        # Assert/act
+        with self.assertRaises(InvalidTransformException) as context:
+
+            TransformApplier(test_schema)
+        
+        self.assertTrue("Invalid name for a custom transform function" in str(context.exception))
+
+    def test_invalid_transform_module_name(self):
+
+        # Arrange
+        test_schema = {
+            "type": "record",
+            "name": "ExampleBaseSchema",
+            "fields": [
+               {"name": "field_3", "transform": "tests.custom_functions_for_tests_nope.sum(5)", "type": "int"}
+            ]
+        }
+
+        with self.assertRaises(InvalidTransformException) as context:
+
+            TransformApplier(test_schema)
+
+    def test_invalid_transform_module_name(self):
+
+        # Arrange
+        test_schema = {
+            "type": "record",
+            "name": "ExampleBaseSchema",
+            "fields": [
+               {"name": "field_3", "transform": "sum(5)", "type": "int"}
+            ]
+        }
+
+        with self.assertRaises(InvalidTransformException) as context:
+
+            TransformApplier(test_schema)
+        
+        # Assert
+        self.assertTrue("Invalid module for a custom transform function" in str(context.exception))
+
+    def test_several_transform_phases(self):
+
+        # Arrange
+        test_schema = {
+            "type": "record",
+            "name": "ExampleBaseSchema",
+            "fields": [
+               {"name": "field_1", "type": "string"},
+               {"name": "field_2", "type": "int", "transform": [None, "copyFrom(field_3)"]},
+               {"name": "field_3", "type": "int", "transform": ["tests.custom_functions_for_tests.sum(1)", "copyFrom(field_2)"]},
+               {"name": "field_4", "transform": [None, None, "toNull"], "type": "int"},
+               {"name": "field_5", "transform": [None, None, "copyFrom(field_4)"], "type": "int"},
+               {"name": "field_6", "transform": "tests.custom_functions_for_tests.sum(4)", "type": "int"}
+            ]
+        }
+
+        input_record = {
+            "field_1": "hola",
+            "field_2": 56,
+            "field_3": 7,
+            "field_4": 78,
+            "field_6": 12
+        }
+
+        expected_record = {
+            "field_1": "hola",
+            "field_2": 8,
+            "field_3": 56,
+            "field_4": None,
+            "field_5": 78,
+            "field_6": 16 
+        }
+
+        # Act
+        res = TransformApplier(test_schema).apply("ExampleBaseSchema", input_record)
+        
+        # Assert
+        self.assertDictEqual(res, expected_record)
 
     #     # Arrange
     #     test_schema = {

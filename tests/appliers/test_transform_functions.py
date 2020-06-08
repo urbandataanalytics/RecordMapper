@@ -20,7 +20,7 @@ class test_transform_functions(unittest.TestCase):
         res = transform_function(None, input_record, None)
 
         # Assert
-        self.assertEqual(res, "field_2")
+        self.assertEqual(res, "hola")
 
     def test_toNull(self):
 
