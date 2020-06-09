@@ -9,14 +9,13 @@ class test_transform_functions(unittest.TestCase):
 
         # Arrange
         input_record = {
-            "field_1": 5,
-            "field_2": "hola"
+            ("field_1",): 5,
+            ("field_2",): "hola"
         }
 
         transform_function = transform_functions.copyFrom("field_2")
 
         # Act
-
         res = transform_function(None, input_record, None)
 
         # Assert

@@ -31,22 +31,70 @@ class test_TransformApplier(unittest.TestCase):
             "fields": [
                {"name": "field_1", "type": "string"},
                {"name": "field_2", "type": "int"},
-               {"name": "field_3", "transform": "copyFrom(field_2)"},
-               {"name": "field_4", "transform": ["copyFrom(field_2)"]},
-               {"name": "field_5", "transform": ["copyFrom(field_2)", "toNull"]}
+               {"name": "field_3", "type": "int", "transform": "copyFrom(field_2)"},
+               {"name": "field_4", "type": "int", "transform": ["copyFrom(field_2)"]},
+               {"name": "field_5", "type": "int", "transform": ["copyFrom(field_2)", "toNull"]}
             ]
         }
 
         # Act
-        (schema_name, parsed_dict) = TransformApplier.create_transform_schema(test_schema)
+        (schema_name, parsed_transform_schema) = TransformApplier.create_transform_schema(test_schema)
 
         # Assert
+        without_functions = [
+            (field_key, len(function_list), field_type)
+            for field_key, (function_list, field_type) in parsed_transform_schema.items()
+        ]
+
         self.assertEqual(schema_name, "Example")
-        self.assertEqual(len(parsed_dict["field_1"]), 0)
-        self.assertEqual(len(parsed_dict["field_2"]), 0)
-        self.assertEqual(len(parsed_dict["field_3"]), 1)
-        self.assertEqual(len(parsed_dict["field_4"]), 1)
-        self.assertEqual(len(parsed_dict["field_5"]), 2)
+        self.assertListEqual(without_functions, [
+           (("field_1",), 0, "string"), 
+           (("field_2",), 0, "int"), 
+           (("field_3",), 1, "int"), 
+           (("field_4",), 1, "int"), 
+           (("field_5",), 2, "int")
+        ])
+
+    def test_create_transform_schema_with_nested_schemas(self):
+
+        # Arrange
+        test_schema = {
+            "type": "record",
+            "name": "Example",
+            "fields": [
+               {"name": "field_1", "type": "string"},
+               {"name": "field_2", "type": "int"},
+               {"name": "field_3", "type": "int", "transform": "copyFrom(field_2)"},
+               {"name": "field_4", "type": "ExampleNested"}
+            ]
+        }
+
+        test_nested_schema = {
+            "type": "record",
+            "name": "ExampleNested",
+            "fields": [
+               {"name": "nested_field_1", "type": "string"},
+               {"name": "nested_field_2", "type": "int", "transform": "copyFrom(field_2)"},
+            ]
+        }
+
+        # Act
+        parsed_transform_schema = TransformApplier(test_schema, test_nested_schema).get_complete_transform_schema("Example")
+
+        without_functions = [
+            (field_key, len(function_list), field_type)
+            for field_key, (function_list, field_type) in parsed_transform_schema.items()
+        ]
+
+        # Assert
+        self.assertListEqual(without_functions, [
+           (("field_1",), 0, "string"), 
+           (("field_2",), 0, "int"), 
+           (("field_3",), 1, "int"), 
+           (("field_4",), 0, "ExampleNested"), 
+           (("field_4", "nested_field_1"), 0, "string"),
+           (("field_4", "nested_field_2"), 1, "int")
+        ])
 
 
     def test_transform_with_one_phase(self):
@@ -200,6 +248,56 @@ class test_TransformApplier(unittest.TestCase):
         
         # Assert
         self.assertDictEqual(res, expected_record)
+
+    def test_transform_with_nested_schemas(self):
+
+        # Arrange
+        test_schema = {
+            "type": "record",
+            "name": "ExampleBaseSchema",
+            "fields": [
+               {"name": "field_1", "type": "string"},
+               {"name": "field_2", "type": "int", "transform": [None, "copyFrom(field_3)"]},
+               {"name": "field_3", "type": "int", "transform": ["tests.custom_functions_for_tests.sum(1)", "copyFrom(field_2)"]},
+               {"name": "field_4", "type": "ExampleNestedSchema"}
+            ]
+        }
+
+        test_nested_schema = {
+            "type": "record",
+            "name": "ExampleNestedSchema",
+            "fields": [
+               {"name": "nested_field_1", "type": "string"},
+               {"name": "nested_field_2", "type": "int", "transform": [None, "copyFrom(field_3)"]},
+               {"name": "nested_field_3", "type": "int", "transform": [None, None, "copyFrom(field_3)", "tests.custom_functions_for_tests.sum(1)"]},
+               {"name": "nested_field_4", "type": "int", "transform": ["toNull"]}
+            ]
+        }
+
+        input_record = {
+            "field_1": "hola",
+            "field_2": 56,
+            "field_3": 7
+        }
+
+        expected_record = {
+            "field_1": "hola",
+            "field_2": 8,
+            "field_3": 56,
+            "field_4": {
+                "nested_field_2": 8,
+                "nested_field_3": 57,
+                "nested_field_4": None
+            }
+        }
+
+        # Act
+        res = TransformApplier(test_schema, test_nested_schema).apply("ExampleBaseSchema", input_record)
+        print("res:", res)
+        
+        # Assert
+        self.assertDictEqual(res, expected_record)
+
 
     #     # Arrange
     #     test_schema = {
