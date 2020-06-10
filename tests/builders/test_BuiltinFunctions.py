@@ -1,6 +1,6 @@
 import unittest
 
-from RecordMapper.appliers.TransformApplier import transform_functions
+from RecordMapper.builders import BuiltinFunctions
 
 
 class test_transform_functions(unittest.TestCase):
@@ -13,7 +13,7 @@ class test_transform_functions(unittest.TestCase):
             ("field_2",): "hola"
         }
 
-        transform_function = transform_functions.copyFrom("field_2")
+        transform_function = BuiltinFunctions.copyFrom("field_2")
 
         # Act
         res = transform_function(None, input_record, None)
@@ -29,7 +29,7 @@ class test_transform_functions(unittest.TestCase):
             "field_2": "hola"
         }
 
-        transform_function = transform_functions.toNull()
+        transform_function = BuiltinFunctions.toNull()
 
         # Act
 
