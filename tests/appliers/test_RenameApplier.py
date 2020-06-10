@@ -30,7 +30,7 @@ class test_RenameApplier(unittest.TestCase):
         self.assertEqual(schema_name, "Example")
         self.assertDictEqual(parsed_dict, expected_dict)
     
-    def test_create_rename_schema_with_mutiple_types_of_nested_records_and_raises_an_error(self):
+    def test_create_rename_schema_with_mutiple_types_of_nested_records_and_it_raises_an_error(self):
 
         # Arrange
         test_schema = {

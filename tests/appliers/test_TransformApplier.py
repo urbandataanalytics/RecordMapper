@@ -30,7 +30,7 @@ class test_TransformApplier(unittest.TestCase):
             "name": "Example",
             "fields": [
                {"name": "field_1", "type": "string"},
-               {"name": "field_2", "type": "int"},
+               {"name": "field_2", "type": ["int", "null"]},
                {"name": "field_3", "type": "int", "transform": "copyFrom(field_2)"},
                {"name": "field_4", "type": "int", "transform": ["copyFrom(field_2)"]},
                {"name": "field_5", "type": "int", "transform": ["copyFrom(field_2)", "toNull"]}
@@ -48,11 +48,11 @@ class test_TransformApplier(unittest.TestCase):
 
         self.assertEqual(schema_name, "Example")
         self.assertListEqual(without_functions, [
-           (("field_1",), 0, "string"), 
-           (("field_2",), 0, "int"), 
-           (("field_3",), 1, "int"), 
-           (("field_4",), 1, "int"), 
-           (("field_5",), 2, "int")
+           (("field_1",), 0, ["string"]), 
+           (("field_2",), 0, ["int", "null"]), 
+           (("field_3",), 1, ["int"]), 
+           (("field_4",), 1, ["int"]), 
+           (("field_5",), 2, ["int"])
         ])
 
     def test_create_transform_schema_with_nested_schemas(self):
@@ -73,7 +73,7 @@ class test_TransformApplier(unittest.TestCase):
             "type": "record",
             "name": "ExampleNested",
             "fields": [
-               {"name": "nested_field_1", "type": "string"},
+               {"name": "nested_field_1", "type": ["string", "null"]},
                {"name": "nested_field_2", "type": "int", "transform": "copyFrom(field_2)"},
             ]
         }
@@ -88,12 +88,12 @@ class test_TransformApplier(unittest.TestCase):
 
         # Assert
         self.assertListEqual(without_functions, [
-           (("field_1",), 0, "string"), 
-           (("field_2",), 0, "int"), 
-           (("field_3",), 1, "int"), 
-           (("field_4",), 0, "ExampleNested"), 
-           (("field_4", "nested_field_1"), 0, "string"),
-           (("field_4", "nested_field_2"), 1, "int")
+           (("field_1",), 0, ["string"]), 
+           (("field_2",), 0, ["int"]), 
+           (("field_3",), 1, ["int"]), 
+           (("field_4",), 0, ["ExampleNested"]), 
+           (("field_4", "nested_field_1"), 0, ["string", "null"]),
+           (("field_4", "nested_field_2"), 1, ["int"])
         ])
 
 
@@ -293,82 +293,35 @@ class test_TransformApplier(unittest.TestCase):
 
         # Act
         res = TransformApplier(test_schema, test_nested_schema).apply("ExampleBaseSchema", input_record)
-        print("res:", res)
         
         # Assert
         self.assertDictEqual(res, expected_record)
 
+    def test_create_transform_schema_with_mutiple_types_of_nested_records_and_it_raises_an_error_on_apply(self):
 
-    #     # Arrange
-    #     test_schema = {
-    #         "type": "record",
-    #         "name": "ExampleBaseSchema",
-    #         "fields": [
-    #            {"name": "field_1", "type": "string"},
-    #            {"name": "field_renamed", "aliases": ["field_2"], "type": "int"}
-    #         ]
-    #     }
+        # Arrange
+        test_schema = {
+            "type": "record",
+            "name": "Example",
+            "fields": [
+               {"name": "field_1", "type": "int"},
+               {"name": "field_2", "type": ["NestedExample1", "NestedExample2"]}
+            ]
+        }
 
-    #     input_dict = {
-    #         "field_1": "hola",
-    #         "field_2": 56,
-    #         "unknown_field": "dummyValue"
-    #     }
-    #     expected_dict = {
-    #         "field_1": "hola",
-    #         "field_renamed": 56,
-    #         "unknown_field": "dummyValue"
-    #     }
+        test_nested_schema_1 = {
+            "type": "record",
+            "name": "NestedExample1",
+            "fields": []
+        }
 
-    #     # Act
-    #     res = RenameApplier(test_schema).apply("ExampleBaseSchema", input_dict)
-        
-    #     # Assert
-    #     self.assertDictEqual(res, expected_dict)
+        test_nested_schema_2 = {
+            "type": "record",
+            "name": "NestedExample2",
+            "fields": []
+        }
 
-    # def test_nested_renaming(self):
+        with self.assertRaises(RuntimeError) as context:
+            TransformApplier(test_schema, test_nested_schema_1, test_nested_schema_2).apply('Example', {"field_2": {}})
 
-    #     # Arrange
-    #     test_schema = {
-    #         "type": "record",
-    #         "name": "TestRecord",
-    #         "fields": [
-    #            {"name": "field_1", "type": "string"},
-    #            {"name": "field_renamed", "aliases": ["field_2"], "type": "int"},
-    #            {"name": "nested_record", "type": "TestNestedRecord"}
-    #         ]
-    #     }
-
-    #     test_nested_schema = {
-    #         "type": "record",
-    #         "name": "TestNestedRecord",
-    #         "fields": [
-    #            {"name": "inner_field_1", "type": "string"},
-    #            {"name": "inner_field_renamed", "aliases": ["inner_field_2"], "type": "int"}
-    #         ]
-    #     }
-
-    #     input_dict = {
-    #         "field_1": "hola",
-    #         "field_2": 56,
-    #         "nested_record": {
-    #             "inner_field_1": "adios", 
-    #             "inner_field_2" : 32
-    #         }
-    #     }
-
-    #     expected_dict = {
-    #         "field_1": "hola",
-    #         "field_renamed": 56,
-    #         "nested_record": {
-    #             "inner_field_1": "adios", 
-    #             "inner_field_renamed" : 32
-    #         }
-    #     }
-
-    #     # Act
-    #     res = RenameApplier(test_schema, test_nested_schema).apply("TestRecord", input_dict) 
-
-    #     # Assert
-    #     self.assertDictEqual(res, expected_dict)
-    
+        self.assertTrue("key has several nested record types" in str(context.exception))

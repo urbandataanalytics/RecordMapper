@@ -22,11 +22,10 @@ class TransformApplier(object):
         max_phases = max([len(transform_tuple.functions_list) for _, transform_tuple in complete_transform_schema.items()])
 
         # Initial copy of the record
-        new_record = dict([((key,), transform_tuple) for key, transform_tuple in record.items()])
+        new_record = dict([((key,), value) for key, value in record.items()])
 
         # Iterate over phases and get the transform_functions
         for phase_index in range(max_phases):
-            print("new_record:", phase_index, new_record)
             new_values_in_this_phase = {}
             transforms_by_key = [
                (field_key, field_function_list[phase_index])
@@ -52,12 +51,16 @@ class TransformApplier(object):
 
         final_complete_schema = {**base_transform_schema}
 
-        for super_key, (function_list, field_type) in base_transform_schema.items():
+        for super_key, (function_list, field_type_list) in base_transform_schema.items():
+
             # If there is a nested schema, add it to the final_complete_schema
-            if field_type in self.transforms_schema.keys():
-                nested_schema = self.transforms_schema[field_type]
+            nested_schema_names = [field_type for field_type in field_type_list if field_type in self.transforms_schema.keys()]
+            if len(nested_schema_names) == 1:
+                nested_schema = self.transforms_schema[nested_schema_names[0]]
                 for nested_key, (nested_function_list, nested_field_type) in nested_schema.items():
                     final_complete_schema[super_key + nested_key] = TransformTuple(nested_function_list, nested_field_type)
+            elif len(nested_schema_names) > 1:
+                raise RuntimeError(f"A key has several nested record types! (Not supported) -> {super_key}")
 
         return final_complete_schema
 
@@ -69,6 +72,8 @@ class TransformApplier(object):
         for field in schema[Variables.FIELDS]:
             field_name = field[Variables.NAME]
             field_type = field[Variables.TYPE]
+            # Get type as list if it is a string
+            type_list = field_type if not isinstance(field_type, str) else [field_type]
 
             if Variables.TRANSFORM in field:
                 transform_list = field[Variables.TRANSFORM]
@@ -79,9 +84,9 @@ class TransformApplier(object):
                     if transform_name is not None else None 
                     for transform_name in transform_list
                 ]
-                transform_schema[(field_name,)] = TransformTuple(transform_function_list, field_type)
+                transform_schema[(field_name,)] = TransformTuple(transform_function_list, type_list)
             else:
-                transform_schema[(field_name,)] = TransformTuple([], field_type)
+                transform_schema[(field_name,)] = TransformTuple([], type_list)
 
         return schema_name, transform_schema
 
