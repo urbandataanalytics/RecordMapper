@@ -26,7 +26,7 @@ class test_NestedSchemaSelectorApplier(unittest.TestCase):
             }
         }
 
-        test_input_record = {"field_1": "hola"}
+        test_input_record = {("field_1",): "hola"}
 
         # Act
 
