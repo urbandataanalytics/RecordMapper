@@ -15,20 +15,21 @@ class test_RenameApplier(unittest.TestCase):
                ("field_renamed", ):FieldData(["string"], ["field_2"], [], []) 
         }
 
-        input_dict = {
+        input_record = {
             ("field_1",): "hola",
             ("field_2",): 56
         }
 
-        expected_dict = {
+        expected_record = {
             ("field_1",): "hola",
             ("field_2",): 56,
             ("field_renamed",): 56 
         }
 
         # Act
-        res = RenameApplier().apply(input_dict, test_flat_schema)
+        res_record, res_schema = RenameApplier().apply(input_record, test_flat_schema)
         
         # Assert
-        self.assertDictEqual(res, expected_dict)
+        self.assertDictEqual(res_record, expected_record)
+        self.assertDictEqual(res_schema, test_flat_schema) # Without changes
 

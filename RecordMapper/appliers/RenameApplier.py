@@ -16,4 +16,4 @@ class RenameApplier(object):
                 if (alias,) in new_record:
                     new_record[key] = new_record[(alias,)]
 
-        return new_record
+        return (new_record, flat_schema)

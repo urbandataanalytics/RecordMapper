@@ -35,5 +35,5 @@ class test_NestedSchemaSelectorApplier(unittest.TestCase):
         # Assert
         self.assertDictEqual(res_record, test_input_record) # Without changes
         
-        self.assertListEqual(list(res_complete_flat_schema.keys()), [("field_1",), ("field_2", ), ("field_2", "nested_field_1")])
+        self.assertListEqual(list(res_complete_flat_schema.keys()), [("field_1",), ("field_2", "nested_field_1")])
 

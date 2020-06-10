@@ -28,6 +28,9 @@ class NestedSchemaSelectorApplier(object):
 
                     for nested_key, nested_field_data in nested_schema.items():
                         complete_flat_schema[field_key+nested_key] = nested_field_data
+
+                    # Remove the "super key" to avoid problems
+                    del complete_flat_schema[field_key]
                 else:
                     raise RuntimeError(f"Invalid nested schema name: {nested_schema_name}")
 
