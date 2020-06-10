@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from RecordMapper.types import Record, Variables, NoDefault
 
-RenameTuple = namedtuple("RenameTuple", ['new_key', 'type'])
+RenameTuple = namedtuple("RenameTuple", ['new_key', 'types'])
 
 class RenameApplier(object):
 
@@ -21,16 +21,21 @@ class RenameApplier(object):
         for field in schema[Variables.FIELDS]:
             field_name = field[Variables.NAME]
             field_type = field[Variables.TYPE]
+            print("field_type:", field_type)
+            type_list = field_type if isinstance(field_type, list) else [field_type]
+            print("type_list:", type_list)
             # Rename field_name to itself
-            rename_dict[field_name] = RenameTuple(field_name, field_type)
+            rename_dict[field_name] = RenameTuple(field_name, type_list)
             # rename aliases
             if Variables.ALIASES in field:
                 for alias in field[Variables.ALIASES]:
-                    rename_dict[alias] = RenameTuple(field_name, field_type)
+                    rename_dict[alias] = RenameTuple(field_name, type_list)
+
 
         return schema_name, rename_dict
 
     def apply(self, base_schema: str, record: Record) -> Record:
+        print("rename_schema:", self.rename_schemas)
 
         base_rename_schema = self.rename_schemas[base_schema]
 
@@ -40,14 +45,24 @@ class RenameApplier(object):
         for key, value in record.items():
 
             # It gets the renameTuple or get a "dummy" one if it does not exist
-            renameTuple = base_rename_schema[key] if key in base_rename_schema else RenameTuple(key, None)
+            renameTuple = base_rename_schema[key] if key in base_rename_schema else RenameTuple(key, [])
 
+            nested_record_types = [
+                nested_type
+                for nested_type in renameTuple.types
+                if nested_type in self.rename_schemas
+            ]
+
+            print("nested_record_types:", nested_record_types)
+            # It is not a nested record.
+            if len(nested_record_types) == 0:
+                new_value = value 
             # It is a nested record. We will get the value recursively.
-            if renameTuple.type in self.rename_schemas:
-                new_value = self.apply(renameTuple.type, value)
+            elif len(nested_record_types) == 1:
+                new_value = self.apply(nested_record_types[0], value)
             # It is not a recognizable nested record
             else:
-                new_value = value 
+                raise RuntimeError(f"A key has several nested record types! (Not supported) -> {key}")
 
             new_record[renameTuple.new_key] = new_value
 
