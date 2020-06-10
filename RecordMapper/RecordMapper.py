@@ -1,59 +1,40 @@
-# import re
-# from RecordMapper.types import Record, Variables, NoDefault
-# from RecordMapper.appliers import RenameApplier
-# from RecordMapper.appliers import TransformApplier
-# from RecordMapper.utils    import chain_functions
+import re
+from typing import List
+from RecordMapper.appliers  import NestedSchemaSelectorApplier
+from RecordMapper.appliers import RenameApplier
+from RecordMapper.appliers import TransformApplier
+
+from RecordMapper.builders import FlatSchemaBuilder
+from RecordMapper.builders import FlatRecordBuilder
+
+from RecordMapper.utils    import chain_functions
 
 
 class RecordMapper(object):
-    pass
-#     """
-#     Avrotransformer provides some useful methods to
-#     transform a data list (List[dict]) into another one
-#     using an avro schema as a reference to do transformations.
+    def __init__(self, schemas: List[dict]):
+        self.original_schemas = schemas
+        self.flat_schemas = dict([(schema["name"], FlatSchemaBuilder.get_flat_schema(schema)) for schema in self.original_schemas])
 
-#     This avro schema will have some custom fields:
-#         - transform: Indicates a transform function that will be applied
-#           to input value to get the correct one. This transform can be a
-#           type conversion, scaling, a threshold, etc.
-#         - comment: Some info of the field.
-#     """
+        self.selector_applier = NestedSchemaSelectorApplier(self.flat_schemas)
+        self.rename_applier = RenameApplier()
+        self.transform_applier = TransformApplier()
 
-#     def __init__(self, avro_schema: dict):
-#         """
-#         AvroTransformer constructor. It use an avro schema
-#         as a reference to rename and transform records.
-#         :param avro_schema: The provided schema.
-#         :type avro_schema: dict
-#         """
-#         self.original_schema = avro_schema
-#         self.rename_applier = RenameApplier(avro_schema)
-#         self.transform_applier = TransformApplier(avro_schema)
+    def transform_record(self, record: dict, schema_name: str) -> dict:
 
-#     def get_original_schema(self) -> dict:
-#         """Returns the original provided schema.
-#         :return: An avro schema.
-#         :rtype: dict
-#         """
-#         return self.original_schema
+        base_flat_schema = self.flat_schemas[schema_name]
 
-#     def apply_all_transforms(self, record: Record) -> Record:
-#         """
-#         This function applies all the object transformations to an input record.
-#            Steps will be:
-#             - get_renamed_record_an_remove_invalid_fields
-#             - get_transformed_record
-#             - get_record_with_defaults
-#         :param record: The input record.
-#         :type record: Record
-#         :return: A record with all transformations applied.
-#         :rtype: Record
-#         """
+        flat_record = FlatRecordBuilder.get_flat_record_from_normal_record(record)
 
-#         all_functions = chain_functions(
-#             self.rename_applier.apply,
-#             self.transform_applier.apply
-#         )
-#         return all_functions(record)
+        all_functions = chain_functions(
+            self.selector_applier.apply,
+            self.rename_applier.apply,
+            self.transform_applier.apply
+        )
+        
+        transformed_record, transformed_flat_schema = all_functions(flat_record, base_flat_schema)
+
+        normal_record = FlatRecordBuilder.get_normal_record_from_flat_record(transformed_record)
+
+        return normal_record
 
     

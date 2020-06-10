@@ -10,7 +10,6 @@ class NestedSchemaSelectorApplier(object):
     def __init__(self, flat_schemas: Dict[str, dict]):
 
         self.flat_schemas = flat_schemas
-        print("eh:", self.flat_schemas)
 
     def apply(self, record: dict, base_flat_schema: dict) -> (dict, dict):
 
