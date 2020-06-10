@@ -1,17 +1,11 @@
 from typing import Union, List
 from collections import namedtuple
 
-FieldData = namedtuple("FieldData", ["types", "aliases", "transforms", "selector"])
-
 from RecordMapper.builders import FunctionBuilder
 
-
+FieldData = namedtuple("FieldData", ["types", "aliases", "transforms", "selector"])
 
 class FlatSchemaBuilder(object):
-
-    def __init__(self, schemas: List[dict]):
-
-        self.schemas = dict([(schema["name"], FlatSchemaBuilder.get_flat_schema(schema)) for schema in schemas])
 
     @staticmethod
     def get_flat_schema(schema: dict) -> dict:
