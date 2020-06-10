@@ -13,12 +13,12 @@ class FunctionBuilder(object):
     @staticmethod
     def parse_function_str(function_str: str) -> Callable[[object, dict], object]:
 
-        parsed_function = re.match("^([\.\w]+)(?:\(([\w|,]+)\))?$", function_str)
+        parsed_function = re.match("^([\.\w]+)(?:\(([\w|,]*)\))?$", function_str)
         if not parsed_function:
             raise RuntimeError(f"Invalid name for a transform function: '{function_str}'")
 
         function_name, args = parsed_function.groups()
-        args_list = str(args).split(",") if args is not None else []
+        args_list = str(args).split(",") if (args is not None and args != '') else []
 
         # Check if it is a built-in function
         builtin_function = FunctionBuilder.get_builtin_function(function_name, args_list) 
@@ -50,10 +50,10 @@ class FunctionBuilder(object):
             mod = importlib.import_module(module_path)
             transform_function = getattr(mod, function_name)
         except ModuleNotFoundError:
-            raise (f"Invalid module for a custom transform function: '{function_name}'")
+            raise InvalidFunctionError(f"Invalid module for a custom function: '{function_name}'")
         except ValueError:
-            raise InvalidFunctionError(f"Invalid module for a custom transform function: '{function_name}'")
+            raise InvalidFunctionError(f"Invalid module for a custom function: '{function_name}'")
         except AttributeError:
-            raise InvalidFunctionError(f"Invalid name for a custom transform function: '{function_name}'")
+            raise InvalidFunctionError(f"Invalid name for a custom function: '{function_name}'")
 
         return transform_function(*args_list)

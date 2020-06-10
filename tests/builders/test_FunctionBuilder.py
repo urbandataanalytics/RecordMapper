@@ -1,6 +1,7 @@
 import unittest
 
 from RecordMapper.builders import FunctionBuilder
+from RecordMapper.builders.FunctionBuilder import InvalidFunctionError
 
 class test_FunctionBuilder(unittest.TestCase):
 
@@ -68,53 +69,22 @@ class test_FunctionBuilder(unittest.TestCase):
 
 
     
-    # def test_invalid_transform_function_name(self):
+    def test_invalid_function_name(self):
 
-    #     # Arrange
-    #     test_schema = {
-    #         "type": "record",
-    #         "name": "ExampleBaseSchema",
-    #         "fields": [
-    #            {"name": "field_3", "transform": "tests.custom_functions_for_tests.nope(5)", "type": "int"}
-    #         ]
-    #     }
+        # Arrange/Assert/act
+        with self.assertRaises(InvalidFunctionError) as context:
 
-    #     # Assert/act
-    #     with self.assertRaises(InvalidTransformException) as context:
-
-    #         TransformApplier(test_schema)
+            FunctionBuilder.parse_function_str("tests.custom_functions_for_tests.nope(5)")
         
-    #     self.assertTrue("Invalid name for a custom transform function" in str(context.exception))
+        # Assert
+        self.assertTrue("Invalid name for a custom function" in str(context.exception))
 
-    # def test_invalid_transform_module_name(self):
+    def test_invalid_module_name(self):
 
-    #     # Arrange
-    #     test_schema = {
-    #         "type": "record",
-    #         "name": "ExampleBaseSchema",
-    #         "fields": [
-    #            {"name": "field_3", "transform": "tests.custom_functions_for_tests_nope.sum(5)", "type": "int"}
-    #         ]
-    #     }
+        # Arrange/Assert/act
+        with self.assertRaises(InvalidFunctionError) as context:
 
-    #     with self.assertRaises(InvalidTransformException) as context:
-
-    #         TransformApplier(test_schema)
-
-    # def test_invalid_transform_module_name(self):
-
-    #     # Arrange
-    #     test_schema = {
-    #         "type": "record",
-    #         "name": "ExampleBaseSchema",
-    #         "fields": [
-    #            {"name": "field_3", "transform": "sum(5)", "type": "int"}
-    #         ]
-    #     }
-
-    #     with self.assertRaises(InvalidTransformException) as context:
-
-    #         TransformApplier(test_schema)
+            FunctionBuilder.parse_function_str("tests.custom_functions_for_tests_nope.sum(5)")
         
-    #     # Assert
-    #     self.assertTrue("Invalid module for a custom transform function" in str(context.exception))
+        # Assert
+        self.assertTrue("Invalid module for a custom function" in str(context.exception))
