@@ -3,6 +3,7 @@ from typing import List
 from RecordMapper.appliers  import NestedSchemaSelectorApplier
 from RecordMapper.appliers import RenameApplier
 from RecordMapper.appliers import TransformApplier
+from RecordMapper.appliers import CleanApplier
 
 from RecordMapper.builders import FlatSchemaBuilder
 from RecordMapper.builders import FlatRecordBuilder
@@ -18,6 +19,7 @@ class RecordMapper(object):
         self.selector_applier = NestedSchemaSelectorApplier(self.flat_schemas)
         self.rename_applier = RenameApplier()
         self.transform_applier = TransformApplier()
+        self.clean_applier = CleanApplier()
 
     def transform_record(self, record: dict, schema_name: str) -> dict:
 
@@ -28,7 +30,8 @@ class RecordMapper(object):
         all_functions = chain_functions(
             self.selector_applier.apply,
             self.rename_applier.apply,
-            self.transform_applier.apply
+            self.transform_applier.apply,
+            self.clean_applier.apply
         )
         
         transformed_record, transformed_flat_schema = all_functions(flat_record, base_flat_schema)

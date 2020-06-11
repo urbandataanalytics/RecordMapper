@@ -36,7 +36,7 @@ class test_FlatSchemaBuilder(unittest.TestCase):
             FlatSchemaBuilder.get_transform_functions_from_field(test_type_field)
 
         # Assert
-        self.assertTrue("Invalid name for a custom function" in str(context.exception))
+        self.assertTrue("Invalid module for a custom function" in str(context.exception))
     
     def test_get_selector_function(self):
 
@@ -55,7 +55,7 @@ class test_FlatSchemaBuilder(unittest.TestCase):
         with self.assertRaises(InvalidFunctionError) as context:
             FlatSchemaBuilder.get_selector_function(test_type)
 
-        self.assertTrue("Invalid name for a ")
+        self.assertTrue("Invalid module for a " in str(context.exception))
 
     def test_get_flat_schema(self):
         # Arrange

@@ -25,7 +25,6 @@ class test_RecordMapper(unittest.TestCase):
         }
 
         expected_record = {
-            "field_auxiliar": 21,
             "field_2": 21,
             "field_4": 21,
             "field_5": None
@@ -67,7 +66,6 @@ class test_RecordMapper_with_nested_schema(unittest.TestCase):
         }
 
         expected_record = {
-            "field_auxiliar": 21,
             "field_2": 21,
             "field_3": "hola",
             "field_4": 21,
