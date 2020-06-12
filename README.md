@@ -1,2 +1,2 @@
 # RecordMapper
-Transform records using an Avro Schema and custom map functions
+Read, transform and write records using an Avro Schema and custom map functions.

@@ -14,6 +14,7 @@ from RecordMapper.utils    import chain_functions
 from RecordMapper.avro.AvroWriter import AvroWriter
 from RecordMapper.avro.AvroReader import AvroReader
 from RecordMapper.csv.CSVWriter import CSVWriter
+from RecordMapper.csv.CSVReader import CSVReader
 
 
 class RecordMapper(object):
@@ -32,6 +33,13 @@ class RecordMapper(object):
         self.rename_applier = RenameApplier()
         self.transform_applier = TransformApplier()
         self.clean_applier = CleanApplier()
+    
+    def execute(self, input_format: str, input_file_path: str, paths_to_write: dict,
+        input_opts: dict = {}, base_schema_to_write: dict = None, nested_schemas_to_write : List[dict] = None):
+
+        read_records = self.read_records(input_format, input_file_path, input_opts)
+        transformed_records = self.transform_records(read_records)
+        self.write_records(transformed_records, paths_to_write, base_schema_to_write, nested_schemas_to_write)
 
 
     def transform_records(self, record_list: List[dict]) -> Iterable:
@@ -59,6 +67,20 @@ class RecordMapper(object):
         normal_record = FlatRecordBuilder.get_normal_record_from_flat_record(transformed_record)
 
         return normal_record
+    
+    def read_records(self, input_format: str, path_to_read: str, opts : dict = {}):
+
+        if input_format == "avro":
+            reader_object = AvroReader(path_to_read)
+        elif input_format == "csv":
+            reader_object = CSVReader(path_to_read)
+        else:
+            raise RuntimeError(f"Invalid input format: {input_format}")
+
+        for record in reader_object.read_records():
+            yield record
+        
+        reader_object.close()
 
     def write_records(self, records_list: Iterable, paths_to_write: dict, base_schema_to_write: dict=None, nested_schemas_to_write : List[dict] = None):
 
@@ -68,24 +90,20 @@ class RecordMapper(object):
         if "avro" not in paths_to_write:
             raise RuntimeError("It is necessary a path to write an Avro File")
 
-        with open(paths_to_write["avro"], "wb") as f: 
-            writer = AvroWriter(
-                f,
-                base_schema_to_write,
-                nested_schemas_to_write
-            )
-
-            writer.write_records(records_list)
-            
-            writer.close()
+        # Avro writing
+        writer = AvroWriter(
+            paths_to_write["avro"],
+            base_schema_to_write,
+            nested_schemas_to_write
+        )
+        writer.write_records(records_list)
+        writer.close()
         
         if "csv" in paths_to_write:
 
             fieldnames = [field["name"] for field in base_schema_to_write["fields"]]
 
-            with open(paths_to_write["csv"], "w") as csv_f:
-                with open(paths_to_write["avro"], "rb") as avro_f:
-                    records = AvroReader(avro_f).read_records()
-                    CSVWriter(csv_f, fieldnames).write_records(records)
+            records = AvroReader(paths_to_write["avro"]).read_records()
+            CSVWriter(paths_to_write["csv"], fieldnames).write_records(records)
 
     

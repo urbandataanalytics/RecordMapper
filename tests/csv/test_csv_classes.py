@@ -21,14 +21,13 @@ class test_AvroWriter(unittest.TestCase):
         # act 
         temp_file = tempfile.NamedTemporaryFile("w", delete=False)
 
-        with open(temp_file.name, "w") as f:
-            writer = CSVWriter(f, fieldnames=["field_1", "field_2", "field_3", "field_4"])
-            writer.write_records(test_records) 
-            writer.close()
+        writer = CSVWriter(temp_file.name, fieldnames=["field_1", "field_2", "field_3", "field_4"])
+        writer.write_records(test_records) 
+        writer.close()
 
-        with open(temp_file.name, "r") as f:
-            reader = CSVReader(f)
-            res_records = [record for record in reader.read_records()]
+        reader = CSVReader(temp_file.name)
+        res_records = [record for record in reader.read_records()]
+        reader.close()
         
         os.remove(temp_file.name)
 

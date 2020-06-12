@@ -9,8 +9,6 @@ class FlatRecordBuilder(object):
     @staticmethod
     def get_normal_record_from_flat_record(flat_record: dict) -> dict:
 
-        print("flaat:", flat_record)
-
         res_record = {}
         for composed_key, value in flat_record.items():
             if len(composed_key) == 1:

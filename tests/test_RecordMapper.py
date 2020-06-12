@@ -38,8 +38,6 @@ class test_RecordMapper(unittest.TestCase):
 
         self.assertDictEqual(res_record, expected_record)
 
-class test_RecordMapper_with_nested_schema(unittest.TestCase):
-
     def test_transform_record(self):
 
         # Arrange
@@ -82,7 +80,7 @@ class test_RecordMapper_with_nested_schema(unittest.TestCase):
 
         self.assertDictEqual(res_record, expected_record)
     
-    def test_write_records(self):
+    def test_execute_from_csv(self):
 
         # Arrange
         test_schema = {
@@ -90,9 +88,9 @@ class test_RecordMapper_with_nested_schema(unittest.TestCase):
             "name": "TestSchema",
             "fields": [
                {"name": "field_1", "type": ["string", "null"], "aliases": ["another_field"]},
-               {"name": "field_2", "aliases": ["field_auxiliar"], "type": ["int", "null"]},
+               {"name": "field_2", "aliases": ["field_auxiliar"], "type": ["int", "null"], "transform": "toInt"},
                {"name": "field_3", "type": ["string", "null"]},
-               {"name": "field_4", "type": "int", "transform": ["copyFrom(field_2)"]},
+               {"name": "field_4", "type": "int", "transform": ["copyFrom(field_2)", "toInt"]},
                {"name": "field_5", "type": "TestNestedSchema", "nestedSchemaSelector": "tests.custom_functions_for_tests.selectSchema(TestNestedSchema)"}
             ]
         }
@@ -106,50 +104,66 @@ class test_RecordMapper_with_nested_schema(unittest.TestCase):
             ]
         }
 
-        input_record = {
-            "field_auxiliar" : 21,
-            "field_3": "hola"
-        }
+        expected_avro_records = [
+            {
+                "field_1": None,
+                "field_2": 21,
+                "field_3": "example_1",
+                "field_4": 21,
+                "field_5": {
+                    "nested_field_1": None,
+                    "nested_field_2": "example_1"
+                }
+            },
+            {
+                "field_1": None,
+                "field_2": 54,
+                "field_3": "example_2",
+                "field_4": 54,
+                "field_5": {
+                    "nested_field_1": None,
+                    "nested_field_2": "example_2"
+                }
+            },
+        ]
 
-        expected_avro_records = {
-            "field_1": None,
-            "field_2": 21,
-            "field_3": "hola",
-            "field_4": 21,
-            "field_5": {
-                "nested_field_1": None,
-                "nested_field_2": "hola"
+        expected_csv_records = [
+            {
+                "field_1" : None,
+                "field_2": '21',
+                "field_3": "example_1",
+                "field_4": '21',
+                "field_5": """{"nested_field_1": null, "nested_field_2": "example_1"}"""
+            },
+            {
+                "field_1" : None,
+                "field_2": '54',
+                "field_3": "example_2",
+                "field_4": '54',
+                "field_5": """{"nested_field_1": null, "nested_field_2": "example_2"}"""
             }
-        }
-
-        expected_csv_records = {
-            "field_1" : '',
-            "field_2": '21',
-            "field_3": "hola",
-            "field_4": '21',
-            "field_5": """{"nested_field_1": null, "nested_field_2": "hola"}"""
-        }
-
+        ]
         # Act
         avro_temp_file = tempfile.NamedTemporaryFile(delete=False)
         csv_temp_file = tempfile.NamedTemporaryFile(delete=False)
 
         record_mapper = RecordMapper(test_schema, [test_nested_schema])
         
-        records = record_mapper.transform_records([input_record])
-        record_mapper.write_records(records, {
+        record_mapper.execute("csv", "tests/files/test_1.csv", {
             "avro": avro_temp_file.name,
             "csv": csv_temp_file.name 
         })
 
         # Assert
-        with open(avro_temp_file.name, "rb") as f:
-            avro_records = list(AvroReader(f).read_records())
-            self.assertListEqual(avro_records, [expected_avro_records])
+        avro_reader = AvroReader(avro_temp_file.name)
+        avro_records = list(avro_reader.read_records())
+        avro_reader.close()
+        self.assertListEqual(avro_records, expected_avro_records)
         
-        with open(csv_temp_file.name, "r") as f:
-            csv_records = list(CSVReader(f).read_records())
-            self.assertListEqual([dict(x) for x in csv_records], [dict(expected_csv_records)])
+        csv_reader = CSVReader(csv_temp_file.name)
+        csv_records = list(csv_reader.read_records())
+        csv_reader.close()
+        self.assertListEqual([dict(x) for x in csv_records], expected_csv_records)
 
         os.remove(avro_temp_file.name)
         os.remove(csv_temp_file.name)

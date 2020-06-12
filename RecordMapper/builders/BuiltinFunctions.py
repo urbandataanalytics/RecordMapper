@@ -15,4 +15,14 @@ def toNull():
 
     return transform_function
 
+def toInt():
+
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, is_nested_record: bool=False):
+        if current_value is None:
+            return None
+        else:
+            return int(current_value)
+    
+    return transform_function
+
 

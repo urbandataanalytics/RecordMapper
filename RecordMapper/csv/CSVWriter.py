@@ -2,29 +2,29 @@ import csv
 import json
 from typing import BinaryIO, List
 
+from RecordMapper.common import Writer
 
-class CSVWriter(object):
+class CSVWriter(Writer):
 
-    def __init__(self, output_stream: BinaryIO, fieldnames: List[str]):
+    def __init__(self, object_to_write: object, fieldnames: List[str]):
 
-        self.csv_writer = csv.DictWriter(output_stream, fieldnames=fieldnames)
-        self.csv_writer.writeheader()
+        super().__init__(object_to_write)
+        self.fieldnames = fieldnames
 
-    def write_records(self, record_list: List[dict]):
+    def write_records_to_output(self, records: List[dict], output: BinaryIO):
 
-        for record in record_list:
-            self.write_record(record)
+        csv_writer = csv.DictWriter(output, fieldnames=self.fieldnames)
+        csv_writer.writeheader()
+
+        for record in records:
+            csv_writer.writerow(self.format_record(record))
     
-    def write_record(self, record: dict):
+    def format_record(self, record: dict):
 
         record_to_write = {**record}
-
 
         for key, value in record.items():
             if isinstance(value, dict):
                 record_to_write[key] = json.dumps(value)
 
-        self.csv_writer.writerow(record_to_write)
-    
-    def close(self):
-        pass
+        return record_to_write

@@ -2,6 +2,8 @@ from typing import BinaryIO, List, Iterable
 
 import fastavro
 
+from RecordMapper.common import Writer
+
 
 class AvroMatchingException(Exception):
     """
@@ -10,11 +12,11 @@ class AvroMatchingException(Exception):
     pass
 
 
-class AvroWriter(object):
+class AvroWriter(Writer):
     """This object create a writer that writes avro data into a file-like object.
     """
 
-    def __init__(self, output_stream: BinaryIO, base_schema: dict, nested_schemas: List[dict] = []):
+    def __init__(self, obj_to_write: object, base_schema: dict, nested_schemas: List[dict] = []):
         """AvroWriter constructor
         
         :param output_stream: The file-like object where data will be writed.
@@ -23,31 +25,25 @@ class AvroWriter(object):
         :type avro_schema: dict
         """
 
+        super().__init__(obj_to_write)
+        self.write_options = "wb"
+
         self.parsed_nested_schemas = [fastavro.parse_schema(schema) for schema in nested_schemas]
         self.parsed_base_schema = fastavro.parse_schema(base_schema) 
 
-        self.writer = fastavro.write.Writer(output_stream, self.parsed_base_schema)
+    def write_records_to_output(self, record_list: Iterable, output: BinaryIO):
 
-    def write_record(self, record: dict):
-        """A method to write an Avro row to the output_stream.
-        
-        :param row: A row of data that matchs with the current schema.
-        :type row: dict
-        :raises AvroMatchingException: When the provided row doesn't match with the current schema.
-        """
-
-        try:
-            self.writer.write(record)
-        except ValueError as ex:
-            raise AvroMatchingException(f"Exception: {ex} for row -> {record}")
-
-    def write_records(self, record_list: Iterable):
+        self.writer = fastavro.write.Writer(output, self.parsed_base_schema)
 
         for record in record_list:
-            self.write_record(record)
+            try:
+                self.writer.write(record)
+            except ValueError as ex:
+                raise AvroMatchingException(f"Exception: {ex} for row -> {record}")
 
     def close(self):
         """Sends the buffer reamining data and closes the output stream
         """
 
         self.writer.flush()
+        super().close()
