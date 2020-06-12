@@ -4,7 +4,7 @@ from os import path
 DEPENDENCIES = [
     'coverage==4.5.4',
     'nose==1.3.7',
-    'fastavro==0.22.7'
+    'fastavro==0.23.4'
 ]
 
 with open('README.md', encoding='utf-8') as f:
