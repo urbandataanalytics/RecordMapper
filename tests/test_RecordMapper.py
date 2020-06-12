@@ -79,6 +79,104 @@ class test_RecordMapper(unittest.TestCase):
         res_record = RecordMapper(test_schema, [test_nested_schema]).transform_record(input_record)
 
         self.assertDictEqual(res_record, expected_record)
+
+    def test_write_with_schemas_for_write(self):
+
+       # Arrange
+        test_schema = {
+            "type": "record",
+            "name": "TestSchema",
+            "fields": [
+               {"name": "field_1", "type": ["string", "null"]},
+               {"name": "field_2", "type": ["int", "null"]},
+               {"name": "field_3", "type": ["TestNestedSchema", "null"]},
+            ]
+        }
+
+        test_nested_schema =  {
+            "type": "record",
+            "name": "TestNestedSchema",
+            "fields": [
+               {"name": "nested_field_1", "type": ["string", "null"]},
+               {"name": "nested_field_2", "type": ["string", "null"]}
+            ]
+        }
+
+        test_schema_for_write = {
+            "type": "record",
+            "name": "TestSchema",
+            "fields": [
+               {"name": "field_1", "type": ["string", "null"]},
+               {"name": "field_3", "type": ["TestNestedSchema", "null"]},
+            ]
+        }
+
+        test_nested_schema_for_write =  {
+            "type": "record",
+            "name": "TestNestedSchema",
+            "fields": [
+               {"name": "nested_field_1", "type": ["string", "null"]},
+               {"name": "nested_field_2", "type": ["string", "null"]},
+               {"name": "nested_field_3", "type": ["string", "null"]}
+            ]
+        }
+
+        input_records = [
+            {
+                "field_1": "example_1",
+                "field_2": 5,
+                "field_3": {
+                    "nested_field_1": "nested_example_11",
+                    "nested_field_2": "nested_example_21"
+                }
+            },
+            {
+                "field_1": "example_2",
+                "field_2": 7,
+                "field_3": {
+                    "nested_field_1": "nested_example_12",
+                    "nested_field_2": "nested_example_22"
+                }
+            }
+        ]
+
+
+        expected_records = [
+            {
+                "field_1": "example_1",
+                "field_3": {
+                    "nested_field_1": "nested_example_11",
+                    "nested_field_2": "nested_example_21",
+                    "nested_field_3": None
+                }
+            },
+            {
+                "field_1": "example_2",
+                "field_3": {
+                    "nested_field_1": "nested_example_12",
+                    "nested_field_2": "nested_example_22",
+                    "nested_field_3": None
+                }
+            }
+        ]
+
+        # Act
+        avro_temp_file = tempfile.NamedTemporaryFile(delete=False)
+
+        record_mapper = RecordMapper(test_schema, [test_nested_schema])
+        
+        record_mapper.write_records(input_records,{
+            "avro": avro_temp_file.name
+        }, test_schema_for_write, [test_nested_schema_for_write])
+
+        # Assert
+        avro_reader = AvroReader(avro_temp_file.name)
+        res_records = list(avro_reader.read_records())
+        avro_reader.close()
+        self.assertListEqual(res_records, expected_records)
+ 
+        os.remove(avro_temp_file.name)
+
     
     def test_execute_from_csv(self):
 
