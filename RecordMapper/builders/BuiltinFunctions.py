@@ -25,4 +25,15 @@ def toInt():
     
     return transform_function
 
+def toString():
+
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, is_nested_record: bool=False):
+        if current_value is None:
+            return None
+        else:
+            return str(current_value)
+    
+    return transform_function
+
+
 
