@@ -1,5 +1,5 @@
 import re
-from typing import List, Iterable, BinaryIO
+from typing import List, Iterable, BinaryIO, Iterator
 
 
 from RecordMapper.appliers  import NestedSchemaSelectorApplier
@@ -18,7 +18,17 @@ from RecordMapper.csv.CSVReader import CSVReader
 
 
 class RecordMapper(object):
+    """The main class of this package. It has methods to transform data using an Avro Schema (and custom functions).
+    """
+
     def __init__(self, base_schema: dict, nested_schemas: List[dict] = []):
+        """__init__ function of RecordMapper.
+
+        :param base_schema: The base schema in avro format to transform the records. 
+        :type base_schema: dict
+        :param nested_schemas: The schemas of the nested record types. Defaults to [].
+        :type nested_schemas: List[dict], optional
+        """
         self.original_base_schema = base_schema
         self.original_nested_schemas = nested_schemas
 
@@ -36,18 +46,47 @@ class RecordMapper(object):
     
     def execute(self, input_format: str, input_file_path: str, paths_to_write: dict,
         input_opts: dict = {}, base_schema_to_write: dict = None, nested_schemas_to_write : List[dict] = None):
+        """The execute process that reads, transforms a writed the data from a format to another one.
+
+        :param input_format: The input format (csv, avro, ...)
+        :type input_format: str
+        :param input_file_path: The path of the input file. 
+        :type input_file_path: str
+        :param paths_to_write: A dict with the output formats (avro, csv...) and their configuration.
+        :type paths_to_write: dict
+        :param input_opts: Some special options of the input process, defaults to {}
+        :type input_opts: dict, optional
+        :param base_schema_to_write: A base schema used to write, defaults to None
+        :type base_schema_to_write: dict, optional
+        :param nested_schemas_to_write: A list of nested record schemas used to write, defaults to None
+        :type nested_schemas_to_write: List[dict], optional
+        """
 
         read_records = self.read_records(input_format, input_file_path, input_opts)
         transformed_records = self.transform_records(read_records)
         self.write_records(transformed_records, paths_to_write, base_schema_to_write, nested_schemas_to_write)
 
 
-    def transform_records(self, record_list: List[dict]) -> Iterable:
+    def transform_records(self, record_list: Iterable[dict]) -> Iterator[dict]:
+        """A generator of transformed records.
+
+        :param record_list: An iterable of records. 
+        :type record_list: Iterable[dict]
+        :yield: A transformed record. 
+        :rtype: Iterator[dict]
+        """
 
         for record in record_list:
             yield self.transform_record(record)
 
     def transform_record(self, record: dict) -> dict:
+        """Apply transforms on a single record. Each transform step is defined in a Applier object.
+
+        :param record: An input record.
+        :type record: dict
+        :return: A transformed record.
+        :rtype: dict
+        """
 
         base_schema_name = self.original_base_schema["name"]
 
@@ -68,7 +107,21 @@ class RecordMapper(object):
 
         return normal_record
     
-    def read_records(self, input_format: str, path_to_read: str, opts : dict = {}):
+    def read_records(self, input_format: str, path_to_read: str, opts: dict = {}) -> Iteraror[dict]:
+        """Read records of a input file.
+
+        :param input_format: The format of the file.
+        :type input_format: str
+        :param path_to_read: The path of the file.
+        :type path_to_read: str
+        :param opts: Some special options in read process, defaults to {}
+        :type opts: dict, optional
+        :raises RuntimeError: [description]
+        :return: [description]
+        :rtype: Iteraror[dict]
+        :yield: [description]
+        :rtype: Iterator[Iteraror[dict]]
+        """
 
         if input_format == "avro":
             reader_object = AvroReader(path_to_read)
@@ -83,6 +136,20 @@ class RecordMapper(object):
         reader_object.close()
 
     def write_records(self, records_list: Iterable, paths_to_write: dict, base_schema_to_write: dict=None, nested_schemas_to_write : List[dict] = None):
+        """Write records to one or several formats. It is necessary to write to an avro file at least.
+
+        :param records_list: A iterable of records. 
+        :type records_list: Iterable
+        :param paths_to_write: A dict with the formats and the paths that will be writed. For example, {"csv": "example.csv", "avro": "example.avro"}. 
+        :type paths_to_write: dict
+        :param base_schema_to_write: A base schema used in write process different from the one
+            used in the transform process, defaults to None
+        :type base_schema_to_write: dict, optional
+        :param nested_schemas_to_write: A list of nested schemas used in write process different
+            from the one used in the transform process, defaults to None
+        :type nested_schemas_to_write: List[dict], optional
+        :raises RuntimeError: Raises and error if there is not a specified path for the avro formato. 
+        """
 
         base_schema_to_write = self.original_base_schema if base_schema_to_write is None else base_schema_to_write
         nested_schemas_to_write = self.original_nested_schemas if nested_schemas_to_write is None else nested_schemas_to_write

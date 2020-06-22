@@ -1,7 +1,12 @@
+from typing import Callable, List
 
-def chain_functions(*functions_list):
+def chain_functions(*functions_list: List[Callable]) -> Callable:
+    """A helper function that creates another one that executes all the functions
+    defined in functions_list in a waterfall way. 
+    :param functions_list: A list of functions.
+    """
 
-    def wrapper_function(*input_args):
+    def wrapper_function(*input_args: List[object]) -> tuple:
 
         res = input_args
 
@@ -14,7 +19,14 @@ def chain_functions(*functions_list):
     return wrapper_function
 
 
-def object_as_tuple(obj):
+def object_as_tuple(obj: object) -> tuple:
+    """Convert an object in a tuple (except if this object is a tuple).
+
+    :param obj: An object 
+    :type obj: object
+    :return: 
+    :rtype: [type]
+    """
 
     if isinstance(obj, tuple):
         return obj
