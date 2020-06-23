@@ -15,9 +15,3 @@ def selectSchema(schema_str: str):
 
     return selectFunction
 
-def get_from_custom_variable(variable_name: str):
-
-    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict, is_nested_record: bool=False):
-        return custom_variables[variable_name]
-
-    return transform_function
