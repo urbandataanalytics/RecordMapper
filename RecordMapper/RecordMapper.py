@@ -21,16 +21,18 @@ class RecordMapper(object):
     """The main class of this package. It has methods to transform data using an Avro Schema (and custom functions).
     """
 
-    def __init__(self, base_schema: dict, nested_schemas: List[dict] = []):
+    def __init__(self, base_schema: dict, nested_schemas: List[dict] = [], custom_variables: dict = {}):
         """__init__ function of RecordMapper.
 
         :param base_schema: The base schema in avro format to transform the records. 
         :type base_schema: dict
         :param nested_schemas: The schemas of the nested record types. Defaults to [].
         :type nested_schemas: List[dict], optional
+        :param custom_variables: A dict of custom variables that will be accesible for the appliers.
         """
         self.original_base_schema = base_schema
         self.original_nested_schemas = nested_schemas
+        self.custom_variables = custom_variables
 
         self.flat_schemas = dict(
             [
@@ -39,10 +41,10 @@ class RecordMapper(object):
             ]
         )
 
-        self.selector_applier = NestedSchemaSelectorApplier(self.flat_schemas)
-        self.rename_applier = RenameApplier()
-        self.transform_applier = TransformApplier()
-        self.clean_applier = CleanApplier()
+        self.selector_applier = NestedSchemaSelectorApplier(self.flat_schemas, self.custom_variables)
+        self.rename_applier = RenameApplier(self.custom_variables)
+        self.transform_applier = TransformApplier(self.custom_variables)
+        self.clean_applier = CleanApplier(self.custom_variables)
     
     def execute(self, input_format: str, input_file_path: str, paths_to_write: dict,
         input_opts: dict = {}, base_schema_to_write: dict = None, nested_schemas_to_write : List[dict] = None):
@@ -107,7 +109,7 @@ class RecordMapper(object):
 
         return normal_record
     
-    def read_records(self, input_format: str, path_to_read: str, opts: dict = {}) -> Iteraror[dict]:
+    def read_records(self, input_format: str, path_to_read: str, opts: dict = {}) -> Iterator[dict]:
         """Read records of a input file.
 
         :param input_format: The format of the file.

@@ -6,6 +6,13 @@ class RenameApplier(object):
     """An applier that applies a renaming process using the defined aliases on the schema
     using the avro convention"""
 
+    def __init__(self, custom_variables: dict):
+        """The constructor of the applier.
+        :param custom_variables: A dict of custom variables.
+        :type custom_variables: dict
+        """
+
+        self.custom_variables = custom_variables
 
     def apply(self, flat_record: dict, flat_schema: dict) -> (dict, dict):
         """Executes the function of this applier. It renames the fields of the input record

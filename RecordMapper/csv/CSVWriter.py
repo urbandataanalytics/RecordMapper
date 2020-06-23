@@ -1,6 +1,6 @@
 import csv
 import json
-from typing import BinaryIO, List
+from typing import BinaryIO, List, Iterable
 
 from RecordMapper.common import Writer
 

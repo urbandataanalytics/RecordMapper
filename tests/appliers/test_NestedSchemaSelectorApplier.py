@@ -30,7 +30,7 @@ class test_NestedSchemaSelectorApplier(unittest.TestCase):
 
         # Act
 
-        res_record, res_complete_flat_schema = NestedSchemaSelectorApplier(test_flat_schemas).apply(test_input_record, test_flat_schemas["base_schema"])
+        res_record, res_complete_flat_schema = NestedSchemaSelectorApplier(test_flat_schemas, {}).apply(test_input_record, test_flat_schemas["base_schema"])
 
         # Assert
         self.assertDictEqual(res_record, test_input_record) # Without changes
@@ -61,7 +61,7 @@ class test_NestedSchemaSelectorApplier(unittest.TestCase):
 
         # Act
 
-        res_record, res_complete_flat_schema = NestedSchemaSelectorApplier(test_flat_schemas).apply(test_input_record, test_flat_schemas["base_schema"])
+        res_record, res_complete_flat_schema = NestedSchemaSelectorApplier(test_flat_schemas, {}).apply(test_input_record, test_flat_schemas["base_schema"])
 
         # Assert
         self.assertDictEqual(res_record, test_input_record) # Without changes

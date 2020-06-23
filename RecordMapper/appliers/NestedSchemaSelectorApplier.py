@@ -9,15 +9,17 @@ class NestedSchemaSelectorApplier(object):
     """An applier that modifies a FlatSchema selecting multiple nested schemas using
        the nestedSchemaSelector function.
     """
-
-    def __init__(self, flat_schemas: Dict[str, dict]):
+    def __init__(self, flat_schemas: Dict[str, dict], custom_variables: dict):
         """The constructor function of this class.
 
         :param flat_schemas: A list of FlatSchemas.
         :type flat_schemas: Dict[str, dict]
+        :param custom_variables: A dict of custom variables.
+        :type custom_variables: dict
         """
 
         self.flat_schemas = flat_schemas
+        self.custom_variables = flat_schemas
 
     def apply(self, record: dict, base_flat_schema: dict) -> (dict, dict):
         """Execute the function of this applier. If a field has several nested schemas as type, this applier

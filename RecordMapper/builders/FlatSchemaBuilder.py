@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Callable
 from collections import namedtuple
 
 from RecordMapper.builders import FunctionBuilder

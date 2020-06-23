@@ -23,7 +23,7 @@ class test_FunctionBuilder(unittest.TestCase):
 
         
         # Assert
-        self.assertEqual(parsed_function(None, input_record, None), expected_result)
+        self.assertEqual(parsed_function(None, input_record, None, {}), expected_result)
 
 
     def test_custom_function(self):
@@ -43,7 +43,7 @@ class test_FunctionBuilder(unittest.TestCase):
         parsed_function = FunctionBuilder.get_custom_function(test_function_name, args_list)
 
         # Assert
-        self.assertEqual(parsed_function(7, input_record, None), expected_res)
+        self.assertEqual(parsed_function(7, input_record, None, {}), expected_res)
 
     def test_parsed_function_str(self):
 
@@ -64,8 +64,8 @@ class test_FunctionBuilder(unittest.TestCase):
         parsed_custom_function = FunctionBuilder.parse_function_str(custom_function_test)
 
         # Assert
-        self.assertEqual(parsed_builtin_function(7, input_record, None), expected_builtin_res)
-        self.assertEqual(parsed_custom_function(7, input_record, None), expected_custom_res)
+        self.assertEqual(parsed_builtin_function(7, input_record, None, {}), expected_builtin_res)
+        self.assertEqual(parsed_custom_function(7, input_record, None, {}), expected_custom_res)
 
 
     

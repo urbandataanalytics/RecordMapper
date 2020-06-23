@@ -3,7 +3,7 @@ import unittest
 from RecordMapper.appliers import TransformApplier
 
 from RecordMapper.builders.FlatSchemaBuilder import FieldData
-from RecordMapper.builders.BuiltinFunctions import copyFrom, toNull
+from RecordMapper.builders.BuiltinFunctions import copyFrom, toNull, get_from_custom_variable
 
 from tests import custom_functions_for_tests 
 
@@ -32,7 +32,7 @@ class test_TransformApplier(unittest.TestCase):
         }
 
         # Act
-        res_record, res_schema = TransformApplier().apply(input_record, test_schema)
+        res_record, res_schema = TransformApplier({}).apply(input_record, test_schema)
         
         # Assert
         self.assertDictEqual(res_record, expected_record)
@@ -61,7 +61,7 @@ class test_TransformApplier(unittest.TestCase):
         }
 
         # Act
-        res_record, res_schema = TransformApplier().apply(input_record, test_schema)
+        res_record, res_schema = TransformApplier({}).apply(input_record, test_schema)
         
         # Assert
         self.assertDictEqual(res_record, expected_record)
@@ -96,7 +96,7 @@ class test_TransformApplier(unittest.TestCase):
         }
 
         # Act
-        res_record, res_schema = TransformApplier().apply(input_record, test_schema)
+        res_record, res_schema = TransformApplier({}).apply(input_record, test_schema)
         
         # Assert
         self.assertDictEqual(res_record, expected_record)
@@ -112,7 +112,9 @@ class test_TransformApplier(unittest.TestCase):
             ("field_4", "nested_field_1") : FieldData(["int"], [], [], None),
             ("field_4", "nested_field_2") : FieldData(["int"], [], [None, copyFrom("field_3")], None),
             ("field_4", "nested_field_3") : FieldData(["int"], [], [None, None, copyFrom("field_3"), custom_functions_for_tests.sum(1)], None),
-            ("field_4", "nested_field_4") : FieldData(["int"], [], [toNull()], None)
+            ("field_4", "nested_field_4") : FieldData(["int"], [], [toNull()], None),
+            ("field_4", "nested_field_5") : FieldData(["int"], [], [get_from_custom_variable("example_variable_2")], None)
+
         }
 
         input_record = {
@@ -127,11 +129,16 @@ class test_TransformApplier(unittest.TestCase):
             ("field_3",): 56,
             ("field_4", "nested_field_2"): 8,
             ("field_4", "nested_field_3"): 57,
-            ("field_4", "nested_field_4"): None
+            ("field_4", "nested_field_4"): None,
+            ("field_4", "nested_field_5"): 9
         }
 
         # Act
-        res_record, res_schema = TransformApplier().apply(input_record, test_schema)
+        res_record, res_schema = TransformApplier({
+            "example_variable_1": 5,
+            "example_variable_2": 9,
+            "example_variable_3": 1
+        }).apply(input_record, test_schema)
         
         # Assert
         self.assertDictEqual(res_record, expected_record)

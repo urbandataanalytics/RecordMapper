@@ -6,7 +6,7 @@ def copyFrom(path_to_copy_from: str):
     """This built-in function return the value of 'path_to_copy_from' key.
     """
 
-    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, is_nested_record: bool=False):
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict, is_nested_record: bool=False):
         composed_key = (path_to_copy_from,)
         return record.get(composed_key, None)
 
@@ -17,7 +17,7 @@ def toNull():
     """This returns always null.
     """
 
-    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, is_nested_record: bool=False):
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict, is_nested_record: bool=False):
         return None
 
     return transform_function
@@ -27,7 +27,7 @@ def toInt():
     """
 
 
-    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, is_nested_record: bool=False):
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict, is_nested_record: bool=False):
         if current_value is None:
             return None
         else:
@@ -36,10 +36,10 @@ def toInt():
     return transform_function
 
 def toString():
-    """This built-in function cast the current value to String and returns the result.
+    """This built-in function casts the current value to String and returns the result.
     """
 
-    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, is_nested_record: bool=False):
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict, is_nested_record: bool=False):
         if current_value is None:
             return None
         else:
@@ -47,5 +47,16 @@ def toString():
     
     return transform_function
 
+def get_from_custom_variable(variable_name: str):
+    """This built-in function gets from custom_variables the value 'variable_name'.
+
+    :param variable_name: The defined variable_name.
+    :type variable_name: str
+    """
+
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict, is_nested_record: bool=False):
+        return custom_variables[variable_name]
+
+    return transform_function
 
 

@@ -8,7 +8,7 @@ class AvroReader(Reader):
     """A Record reader from Avro format.
     """
 
-    def __init__(self, path_to_read: string):
+    def __init__(self, path_to_read: str):
         """Constructor of the AvroRecord.
 
         :param path_to_read: Path of the file to read.
