@@ -48,7 +48,7 @@ class RecordMapper(object):
     
     def execute(self, input_format: str, input_file_path: str, paths_to_write: dict,
         input_opts: dict = {}, base_schema_to_write: dict = None, nested_schemas_to_write : List[dict] = None):
-        """The execute process that reads, transforms a writed the data from a format to another one.
+        """Process that reads, transforms a writes the data from a format to another one.
 
         :param input_format: The input format (csv, avro, ...)
         :type input_format: str
@@ -82,7 +82,7 @@ class RecordMapper(object):
             yield self.transform_record(record)
 
     def transform_record(self, record: dict) -> dict:
-        """Apply transforms on a single record. Each transform step is defined in a Applier object.
+        """Apply transforms on a single record. Each transform step is defined in an Applier object.
 
         :param record: An input record.
         :type record: dict
@@ -110,7 +110,7 @@ class RecordMapper(object):
         return normal_record
     
     def read_records(self, input_format: str, path_to_read: str, opts: dict = {}) -> Iterator[dict]:
-        """Read records of a input file.
+        """Read records of an input file.
 
         :param input_format: The format of the file.
         :type input_format: str
@@ -138,19 +138,19 @@ class RecordMapper(object):
         reader_object.close()
 
     def write_records(self, records_list: Iterable, paths_to_write: dict, base_schema_to_write: dict=None, nested_schemas_to_write : List[dict] = None):
-        """Write records to one or several formats. It is necessary to write to an avro file at least.
+        """Writes records to one or several formats. It is necessary to write to an avro file at least.
 
-        :param records_list: A iterable of records. 
+        :param records_list: An iterable of records. 
         :type records_list: Iterable
-        :param paths_to_write: A dict with the formats and the paths that will be writed. For example, {"csv": "example.csv", "avro": "example.avro"}. 
+        :param paths_to_write: A dict with the formats and the paths that will be written. For example, {"csv": "example.csv", "avro": "example.avro"}. 
         :type paths_to_write: dict
-        :param base_schema_to_write: A base schema used in write process different from the one
+        :param base_schema_to_write: A base schema used in the write process different from the one
             used in the transform process, defaults to None
         :type base_schema_to_write: dict, optional
-        :param nested_schemas_to_write: A list of nested schemas used in write process different
+        :param nested_schemas_to_write: A list of nested schemas used in the write process different
             from the one used in the transform process, defaults to None
         :type nested_schemas_to_write: List[dict], optional
-        :raises RuntimeError: Raises and error if there is not a specified path for the avro formato. 
+        :raises RuntimeError: Raises and error if there is not a specified path for the avro format. 
         """
 
         base_schema_to_write = self.original_base_schema if base_schema_to_write is None else base_schema_to_write

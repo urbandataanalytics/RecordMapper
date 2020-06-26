@@ -20,7 +20,7 @@ def chain_functions(*functions_list: List[Callable]) -> Callable:
 
 
 def object_as_tuple(obj: object) -> tuple:
-    """Convert an object in a tuple (except if this object is a tuple).
+    """Transforms an object into a tuple (except if this object is already a tuple).
 
     :param obj: An object 
     :type obj: object

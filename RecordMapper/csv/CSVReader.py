@@ -4,7 +4,7 @@ from typing import BinaryIO, Iterator
 from RecordMapper.common import Reader
 
 class CSVReader(Reader):
-    """A object that read records form a input csv file.
+    """A object that reads records form an input csv file.
     """
 
     def __init__(self, file_path: str):
@@ -18,7 +18,7 @@ class CSVReader(Reader):
         self.filepath = file_path
 
     def read_records_from_input(self, input_stream: BinaryIO) -> Iterator[dict]:
-        """The function that read the records from the input stream.
+        """The function that reads the records from the input stream.
 
         :param input_stream: The input stream of the records.
         :type input_stream: BinaryIO

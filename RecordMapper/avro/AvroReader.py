@@ -20,7 +20,7 @@ class AvroReader(Reader):
         self.read_options ="rb"
 
     def read_records_from_input(self, input_stream: BinaryIO) -> Iterator[dict]:
-        """Read records from a input stream in avro format.
+        """Read records from an input stream in avro format.
 
         :param input_stream: The input stream.
         :type input_stream: BinaryIO

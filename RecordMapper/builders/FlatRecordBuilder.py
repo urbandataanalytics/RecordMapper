@@ -24,7 +24,7 @@ class FlatRecordBuilder(object):
 
     @staticmethod
     def get_flat_record_from_normal_record(record: dict) -> dict:
-        """Flat a record.
+        """Flattens a record.
 
         :param record: The input record.
         :type record: dict
@@ -36,11 +36,11 @@ class FlatRecordBuilder(object):
     @staticmethod
     def get_normal_record_from_flat_record(flat_record: dict) -> dict:
         """
-            Return a "normal record" from a FlatRecord.
-            :param flat_record: A flat record.
-            :type flat_record: dict
-            :return: A normal record.
-            :rtype: dict
+        Return a "normal record" from a FlatRecord.
+        :param flat_record: A flat record.
+        :type flat_record: dict
+        :return: A normal record.
+        :rtype: dict
         """
 
         res_record = {}

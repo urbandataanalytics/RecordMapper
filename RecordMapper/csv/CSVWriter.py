@@ -5,7 +5,7 @@ from typing import BinaryIO, List, Iterable
 from RecordMapper.common import Writer
 
 class CSVWriter(Writer):
-    """The object that write the records to a csv file.
+    """The object that writes records to a csv file.
     """
 
     def __init__(self, file_path: str, fieldnames: List[str]):
@@ -22,7 +22,7 @@ class CSVWriter(Writer):
         self.fieldnames = fieldnames
 
     def write_records_to_output(self, records: Iterable[dict], output: BinaryIO):
-        """Write the records to an output file.
+        """Writes the records to an output file.
 
         :param records: An iterable of records.
         :type records: List[dict]
@@ -37,12 +37,12 @@ class CSVWriter(Writer):
             csv_writer.writerow(self.format_record(record))
     
     def format_record(self, record: dict) -> dict:
-        """Format a record to be writed. For example, dicts will be serialized to
+        """Format a record to be written. For example, dicts will be serialized to
         JSON strings.
 
         :param record: A input record.
         :type record: dict
-        :return: A formatted record to be writed.
+        :return: A formatted record to be written.
         :rtype: dict
         """
 

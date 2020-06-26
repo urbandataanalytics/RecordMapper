@@ -2,7 +2,7 @@
 
 
 class CleanApplier(object):
-    """A applier that removes the unused files of a record (using a schema as a reference).
+    """An applier that removes the unused files of a record (using a schema as a reference).
     """
 
     def __init__(self, custom_variables: dict):

@@ -6,7 +6,7 @@ from typing import Callable, List
 
 
 class TransformApplier(object):
-    """This applier execute the defined transformations for each field.
+    """This applier executes the defined transformations for each field.
     """
 
     def __init__(self, custom_variables: dict):

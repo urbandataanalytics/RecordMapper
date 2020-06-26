@@ -6,7 +6,7 @@ import importlib
 from RecordMapper.builders import BuiltinFunctions
 
 class InvalidFunctionError(Exception):
-    """An exception that represents a invalid string reference for a function"""
+    """An exception that represents an invalid string reference for a function"""
     pass
 
 class FunctionBuilder(object):
@@ -14,7 +14,8 @@ class FunctionBuilder(object):
 
     @staticmethod
     def parse_function_str(function_str: str) -> Callable[[object, dict], object]:
-        """This function parses a string and generates a function to be used as transform function
+        """
+        This function parses a string and generates a function to be used as a transform function
         :param function_str: A string that represents a function.
         "type function_str: str 
         :return: A transform function.
@@ -40,7 +41,7 @@ class FunctionBuilder(object):
 
     @staticmethod
     def get_builtin_function(function_name: str, args_list: List[str]) -> Callable[[object, dict], object]:
-        """Get a builtin function from a string.
+        """Get a built-in function from a string.
 
         :param function_name: A string that represents a transform function.
         :type function_name: str

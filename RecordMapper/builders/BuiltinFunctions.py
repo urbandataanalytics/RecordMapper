@@ -3,7 +3,7 @@ This module defines a set of built-in functions.
 """
 
 def copyFrom(path_to_copy_from: str):
-    """This built-in function return the value of 'path_to_copy_from' key.
+    """This built-in function returns the value of 'path_to_copy_from' key.
     """
 
     def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict, is_nested_record: bool=False):
@@ -23,7 +23,7 @@ def toNull():
     return transform_function
 
 def toInt():
-    """This built-in function cast the current value to Int and returns the result.
+    """This built-in function casts the current value to Int and returns the result.
     """
 
 
