@@ -27,7 +27,7 @@ class test_RenameApplier(unittest.TestCase):
         }
 
         # Act
-        res_record, res_schema = RenameApplier().apply(input_record, test_flat_schema)
+        res_record, res_schema = RenameApplier({}).apply(input_record, test_flat_schema)
         
         # Assert
         self.assertDictEqual(res_record, expected_record)

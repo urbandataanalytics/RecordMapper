@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# nosetests
+.noseids
+.
+
+#Visual code
+.vscode

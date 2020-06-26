@@ -24,7 +24,7 @@ class test_CleanApplier(unittest.TestCase):
         }
 
         # Act
-        res_record, res_schema = CleanApplier().apply(input_record, test_flat_schema)
+        res_record, res_schema = CleanApplier({}).apply(input_record, test_flat_schema)
 
         # Assert
         self.assertEquals(res_record, expected_record)
