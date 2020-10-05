@@ -18,7 +18,7 @@ class AvroWriter(Writer):
 
     def __init__(self, obj_to_write: object, base_schema: dict, nested_schemas: List[dict] = []):
         """AvroWriter constructor
-        
+
         :param output_stream: The file-like object where data will be writed.
         :type output_stream: file
         :param avro_schema: A valid avro schema as a dict.
@@ -29,9 +29,9 @@ class AvroWriter(Writer):
         self.write_options = "wb"
 
         self.parsed_nested_schemas = [fastavro.parse_schema(schema) for schema in nested_schemas]
-        self.parsed_base_schema = fastavro.parse_schema(base_schema) 
+        self.parsed_base_schema = fastavro.parse_schema(base_schema)
 
-    def write_records_to_output(self, record_list: Iterable, output: BinaryIO):
+    def write_records_to_output(self, record_list: Iterable, output: BinaryIO, output_opts: dict):
 
         self.writer = fastavro.write.Writer(output, self.parsed_base_schema)
 

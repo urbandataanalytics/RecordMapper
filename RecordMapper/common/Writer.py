@@ -1,4 +1,4 @@
-from typing import BinaryIO,Iterable
+from typing import BinaryIO, Iterable
 
 
 class Writer(object):
@@ -17,7 +17,7 @@ class Writer(object):
 
         self.output_stream = None
 
-    def write_records(self, records: Iterable):
+    def write_records(self, records: Iterable, output_opts: dict):
         """This function writes the records to the output file.
 
         :param records: An iterable of records.
@@ -28,9 +28,9 @@ class Writer(object):
 
         self.output_stream = open(self.file_path, self.write_options)
 
-        return self.write_records_to_output(records, self.output_stream)
+        return self.write_records_to_output(records, self.output_stream, output_opts)
 
-    def write_records_to_output(self, records: Iterable, output: BinaryIO):
+    def write_records_to_output(self, records: Iterable, output: BinaryIO, flatten_csv: bool, output_opts: dict):
         """Write the records to an output file. This function has to be implemented by a
         child class.
 
@@ -48,4 +48,3 @@ class Writer(object):
         """
 
         self.output_stream.close()
-

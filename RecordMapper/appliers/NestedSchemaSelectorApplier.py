@@ -1,14 +1,11 @@
-import re
-import importlib
-from collections import namedtuple
-from inspect import getmembers, isfunction
-from typing import Callable, List, Dict
+from typing import Dict
 
 
 class NestedSchemaSelectorApplier(object):
     """An applier that modifies a FlatSchema selecting multiple nested schemas using
        the nestedSchemaSelector function.
     """
+
     def __init__(self, flat_schemas: Dict[str, dict], custom_variables: dict):
         """The constructor function of this class.
 
@@ -19,7 +16,7 @@ class NestedSchemaSelectorApplier(object):
         """
 
         self.flat_schemas = flat_schemas
-        self.custom_variables = flat_schemas
+        self.custom_variables = custom_variables
 
     def apply(self, record: dict, base_flat_schema: dict) -> (dict, dict):
         """Execute the function of this applier. If a field has several nested schemas as type, this applier
@@ -40,13 +37,15 @@ class NestedSchemaSelectorApplier(object):
         for field_key, field_data in base_flat_schema.items():
 
             if field_data.selector is not None:
-                complete_flat_schema = self.select_nested_schema_and_add_their_fields(record, complete_flat_schema, field_key, field_data)
+                complete_flat_schema = self.select_nested_schema_and_add_their_fields(record, complete_flat_schema,
+                                                                                      field_key, field_data)
                 # Remove the "super key" to avoid problems
                 del complete_flat_schema[field_key]
 
         return (record, complete_flat_schema)
 
-    def select_nested_schema_and_add_their_fields(self, record: dict, flat_schema: dict, field_key: str, field_data: tuple) -> dict:
+    def select_nested_schema_and_add_their_fields(self, record: dict, flat_schema: dict, field_key: str,
+                                                  field_data: tuple) -> dict:
         """Select a nested schema for a field (using the defined function in "selector" value of the FieldData) and add their fields
         to the resulting flat schema.
 
@@ -63,7 +62,7 @@ class NestedSchemaSelectorApplier(object):
         :rtype: dict
         """
 
-        nested_schema_name = field_data.selector(field_key, record)
+        nested_schema_name = field_data.selector(field_key, record, self.custom_variables)
 
         # Not schema selected (this field will be null)
         if nested_schema_name is None:
@@ -76,11 +75,11 @@ class NestedSchemaSelectorApplier(object):
 
             fields_to_add = dict(
                 [
-                    (field_key+nested_key, nested_field_data)
+                    (field_key + nested_key, nested_field_data)
                     for nested_key, nested_field_data in nested_schema.items()
                 ]
             )
-            
-            return {**flat_schema, **fields_to_add} 
+
+            return {**flat_schema, **fields_to_add}
         else:
             raise RuntimeError(f"Invalid nested schema name: {nested_schema_name}")
