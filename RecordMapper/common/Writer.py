@@ -30,7 +30,7 @@ class Writer(object):
 
         return self.write_records_to_output(records, self.output_stream, output_opts)
 
-    def write_records_to_output(self, records: Iterable, output: BinaryIO, flatten_csv: bool, output_opts: dict):
+    def write_records_to_output(self, records: Iterable, output: BinaryIO, output_opts: dict):
         """Write the records to an output file. This function has to be implemented by a
         child class.
 

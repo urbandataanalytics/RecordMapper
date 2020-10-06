@@ -43,20 +43,21 @@ class CSVWriter(Writer):
 
         :param record: A input record.
         :type record: dict
-        :param flatten: Indicates if a dictionary should be writen as regluar fields of the record.
-        :type flatten: boolean
+        :param output_opts: Indicates if a dictionary should be writen as regular fields of the record.
+        :type output_opts: boolean
         :return: A formatted record to be written.
         :rtype: dict
         """
 
         record_to_write = {**record}
-
-        flatten = output_opts["flatten_csv"]
-        excluded_field_from_flattening = output_opts["excluded_fields_from_flattening"]
+        flatten = output_opts["flatten_csv"] if output_opts != None and output_opts["flatten_csv"] else False
+        excluded_fields_from_flattening = output_opts["excluded_fields_from_flattening"] if output_opts != None and \
+                                                                                            output_opts[
+                                                                                                "excluded_fields_from_flattening"] else False
 
         for key, value in record.items():
             if isinstance(value, dict):
-                if not flatten or key in excluded_field_from_flattening:
+                if not flatten or key in excluded_fields_from_flattening:
                     record_to_write[key] = json.dumps(value)
                 else:
                     record_to_write[key] = None
