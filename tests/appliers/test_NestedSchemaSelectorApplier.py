@@ -9,7 +9,7 @@ class test_NestedSchemaSelectorApplier(unittest.TestCase):
     def test_apply(self):
         
         # Arrange
-        def test_selector(key, record, custom_fields):
+        def test_selector(key, record):
 
             return "NestSchema1"
 
@@ -40,7 +40,7 @@ class test_NestedSchemaSelectorApplier(unittest.TestCase):
     def test_apply_with_null_result_on_select(self):
 
         # Arrange
-        def test_selector(key, record, custom_fields):
+        def test_selector(key, record):
 
             return None
 
