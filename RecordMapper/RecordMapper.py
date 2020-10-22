@@ -1,3 +1,4 @@
+import itertools
 from typing import List, Iterable, Iterator
 
 from RecordMapper.appliers import NestedSchemaSelectorApplier, RenameApplier, TransformApplier, CleanApplier
@@ -161,19 +162,30 @@ class RecordMapper(object):
         writer = AvroWriter(
             paths_to_write["avro"],
             base_schema_to_write,
-            nested_schemas_to_write
+            nested_schemas_to_write,
+            output_opts
         )
         writer.write_records(records_list, output_opts)
         writer.close()
+
+        for record in records_list:
+            print(records_list)
 
         if "csv" in paths_to_write:
 
             fieldnames = [field["name"] for field in base_schema_to_write["fields"]]
 
             ## If we want to consider to flatten the nested schemas:
-            if output_opts["flatten_csv"] == True:
-                fieldnames_nested = [field["name"] for field in nested_schemas_to_write[0]["fields"]]
-                fieldnames = fieldnames_nested + fieldnames
+            if output_opts.get("flat_nested_schema_on_csv", None) != None:
+                keys = output_opts["flat_nested_schema_on_csv"].values()
+                fieldnames_nested = [nested_schema['fields'] for nested_schema in nested_schemas_to_write if
+                                     nested_schema['name'] in keys]
+
+                fields_concatenated = list(itertools.chain.from_iterable(fieldnames_nested))
+
+                fieldnames_concatenated = [entry['name'] for entry in fields_concatenated]
+
+                fieldnames += fieldnames_concatenated
 
             records = AvroReader(paths_to_write["avro"]).read_records()
             CSVWriter(paths_to_write["csv"], fieldnames).write_records(records, output_opts)

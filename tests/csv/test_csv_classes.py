@@ -22,7 +22,8 @@ class test_AvroWriter(unittest.TestCase):
         temp_file = tempfile.NamedTemporaryFile("w", delete=False)
 
         writer = CSVWriter(temp_file.name, fieldnames=["field_1", "field_2", "field_3", "field_4"])
-        writer.write_records(test_records) 
+        output_opts = {}
+        writer.write_records(test_records, output_opts)
         writer.close()
 
         reader = CSVReader(temp_file.name)

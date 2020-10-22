@@ -5,9 +5,11 @@ import importlib
 
 from RecordMapper.builders import BuiltinFunctions
 
+
 class InvalidFunctionError(Exception):
     """An exception that represents an invalid string reference for a function"""
     pass
+
 
 class FunctionBuilder(object):
     """A Builder class of functions"""
@@ -17,12 +19,11 @@ class FunctionBuilder(object):
         """
         This function parses a string and generates a function to be used as a transform function
         :param function_str: A string that represents a function.
-        "type function_str: str 
+        "type function_str: str
         :return: A transform function.
         :rtype: Callable[[object, dict], object]
         """
-
-        parsed_function = re.match("^([\.\w]+)(?:\(([\w|,]*)\))?$", function_str)
+        parsed_function = re.match("^([\.\w]+)(?:\(([\w|,%\'-: ]*)\))?$", function_str)
         if not parsed_function:
             raise RuntimeError(f"Invalid name for a transform function: '{function_str}'")
 
@@ -30,14 +31,13 @@ class FunctionBuilder(object):
         args_list = str(args).split(",") if (args is not None and args != '') else []
 
         # Check if it is a built-in function
-        builtin_function = FunctionBuilder.get_builtin_function(function_name, args_list) 
+        builtin_function = FunctionBuilder.get_builtin_function(function_name, args_list)
 
         if builtin_function is not None:
             return builtin_function
 
         # Get it as custom function
         return FunctionBuilder.get_custom_function(function_name, args_list)
- 
 
     @staticmethod
     def get_builtin_function(function_name: str, args_list: List[str]) -> Callable[[object, dict], object]:
@@ -52,7 +52,8 @@ class FunctionBuilder(object):
 
         """
         # Check if it is a built-in function
-        possible_function = [obj for name, obj in getmembers(BuiltinFunctions) if name == function_name and isfunction(obj)]
+        possible_function = [obj for name, obj in getmembers(BuiltinFunctions) if
+                             name == function_name and isfunction(obj)]
 
         if len(possible_function) == 1:
             return possible_function[0](*args_list)

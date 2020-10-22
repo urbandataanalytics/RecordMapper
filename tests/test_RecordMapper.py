@@ -75,8 +75,8 @@ class test_RecordMapper(unittest.TestCase):
                 "nested_field_2": "hola"
             }
         }
-
-        res_record = RecordMapper(test_schema, [test_nested_schema]).transform_record(input_record)
+        recordMapper = RecordMapper(test_schema, [test_nested_schema])
+        res_record = recordMapper.transform_record(input_record)
 
         self.assertDictEqual(res_record, expected_record)
 
@@ -247,10 +247,14 @@ class test_RecordMapper(unittest.TestCase):
 
         record_mapper = RecordMapper(test_schema, [test_nested_schema])
         
-        record_mapper.execute("csv", "tests/files/test_1.csv", {
+        record_mapper.execute("csv", "files/test_1.csv", {
             "avro": avro_temp_file.name,
-            "csv": csv_temp_file.name 
-        })
+            "csv": csv_temp_file.name },
+            output_opts={
+                "flat_nested_schema_on_csv": {'field_5': "test_nested_schema"},
+                "merge_schemas": True
+            }
+        )
 
         # Assert
         avro_reader = AvroReader(avro_temp_file.name)
