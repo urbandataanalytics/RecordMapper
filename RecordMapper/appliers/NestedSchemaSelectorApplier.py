@@ -1,5 +1,5 @@
 from typing import Dict
-
+from RecordMapper.builders.FlatSchemaBuilder import FieldData
 
 class NestedSchemaSelectorApplier(object):
     """An applier that modifies a FlatSchema selecting multiple nested schemas using
@@ -45,7 +45,7 @@ class NestedSchemaSelectorApplier(object):
         return (record, complete_flat_schema)
 
     def select_nested_schema_and_add_their_fields(self, record: dict, flat_schema: dict, field_key: str,
-                                                  field_data: tuple) -> dict:
+                                                  field_data: FieldData) -> dict:
         """Select a nested schema for a field (using the defined function in "selector" value of the FieldData) and add their fields
         to the resulting flat schema.
 
@@ -62,10 +62,10 @@ class NestedSchemaSelectorApplier(object):
         :rtype: dict
         """
 
-        nested_schema_name = field_data.selector(field_key, record)
+        nested_schema_name = field_data.selector(field_key, record) if field_data.selector != None and field_data.selector(field_key, record) != None else None
 
         # Not schema selected (this field will be null)
-        if nested_schema_name is None:
+        if nested_schema_name == None:
             return flat_schema
 
         # Schema selected. Add their fields to the complete schema

@@ -90,7 +90,7 @@ class RecordMapper(object):
         base_flat_schema = self.flat_schemas[base_schema_name]
         nested_flat_schema = self.flat_schemas[nested_schema_name]
 
-        base_flat_schema.update(nested_flat_schema)
+#        base_flat_schema.update(nested_flat_schema)
 
         flat_record = FlatRecordBuilder.get_flat_record_from_normal_record(record)
 
@@ -167,9 +167,6 @@ class RecordMapper(object):
         )
         writer.write_records(records_list, output_opts)
         writer.close()
-
-        for record in records_list:
-            print(records_list)
 
         if "csv" in paths_to_write:
 
