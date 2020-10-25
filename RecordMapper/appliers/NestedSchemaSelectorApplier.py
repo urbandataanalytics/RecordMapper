@@ -62,7 +62,8 @@ class NestedSchemaSelectorApplier(object):
         :rtype: dict
         """
 
-        nested_schema_name = field_data.selector(field_key, record) if field_data.selector != None and field_data.selector(field_key, record) != None else None
+        nested_schema_name = field_data.selector(field_key, record, self.custom_variables) \
+            if field_data.selector != None and field_data.selector(field_key, record, self.custom_variables) != None else None
 
         # Not schema selected (this field will be null)
         if nested_schema_name == None:
