@@ -29,8 +29,8 @@ class test_NestedSchemaSelectorApplier(unittest.TestCase):
         test_input_record = {("field_1",): "hola"}
 
         # Act
-
-        res_record, res_complete_flat_schema = NestedSchemaSelectorApplier(test_flat_schemas, {}).apply(test_input_record, test_flat_schemas["base_schema"])
+        ne = NestedSchemaSelectorApplier(test_flat_schemas, {})
+        res_record, res_complete_flat_schema = ne.apply(test_input_record, test_flat_schemas["base_schema"])
 
         # Assert
         self.assertDictEqual(res_record, test_input_record) # Without changes

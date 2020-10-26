@@ -2,8 +2,6 @@ import unittest
 import tempfile
 import os
 
-import fastavro
-
 from RecordMapper.avro import AvroWriter
 from RecordMapper.avro import AvroReader
 
@@ -40,7 +38,8 @@ class test_AvroWriter(unittest.TestCase):
         temp_file = tempfile.NamedTemporaryFile("w", delete=False)
 
         writer = AvroWriter(temp_file.name, test_schema)
-        writer.write_records(test_records) 
+        output_opts = {}
+        writer.write_records(test_records, output_opts)
         writer.close()
 
         reader = AvroReader(temp_file.name)
@@ -94,6 +93,7 @@ class test_AvroWriter(unittest.TestCase):
                 "field_4": 5,
                 "field_with_nested_schema":{
                     "nested_field_1": 5
+
                 }
             }
         ]
@@ -130,7 +130,8 @@ class test_AvroWriter(unittest.TestCase):
         temp_file = tempfile.NamedTemporaryFile("w", delete=False)
 
         writer = AvroWriter(temp_file.name, test_schema, [test_nested_schema])
-        writer.write_records(test_records) 
+        output_opts = {"merge_schemas": True}
+        writer.write_records(test_records, output_opts)
         writer.close()
 
         reader = AvroReader(temp_file.name)
