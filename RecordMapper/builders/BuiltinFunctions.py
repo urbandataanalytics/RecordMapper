@@ -131,7 +131,7 @@ def timestampToDate(format: str):
         else:
             dt = datetime.fromtimestamp(float(current_value) / 1000)
 
-            formatted_time = dt.strftime(f'{format}')[:-3]
+            formatted_time = dt.strftime(f'{format}')
 
             return str(formatted_time)
 
