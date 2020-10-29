@@ -8,7 +8,8 @@ def copyFrom(path_to_copy_from: str):
     """This built-in function returns the value of 'path_to_copy_from' key.
     """
 
-    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict):
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict,
+                           custom_variables: dict):
         composed_key = (path_to_copy_from,)
         return record.get(composed_key, None)
 
@@ -19,19 +20,27 @@ def toNull():
     """This returns always null.
     """
 
-    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict):
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict,
+                           custom_variables: dict):
         return None
 
     return transform_function
 
+
 def toInt():
     """This built-in function casts the current value to Int and returns the result.
     """
-    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict):
+
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict,
+                           custom_variables: dict):
         value_to_return = None
+        
         if current_value is not None:
-            if str(current_value).isdigit():
-                value_to_return = int(round(float(current_value)))
+            try:
+                float_current_value = float(current_value)
+                value_to_return = int(round(float_current_value))
+            except:
+                value_to_return = None
 
         return value_to_return
 
@@ -85,6 +94,27 @@ def toDate(format: str):
     return transform_function
 
 
+def timestampToDate(format: str):
+    """This built-in function casts the current value to Date and returns the result.
+
+    :param format: the passed format which will guide the parser to build the datetime correctly
+    :type format: str
+    """
+
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict,
+                           is_nested_record: bool = False):
+        if current_value is None:
+            return None
+        else:
+            dt = datetime.fromtimestamp(float(current_value) / 1000)
+
+            formatted_time = dt.strftime(f'{format}')[:-3]
+
+            return str(formatted_time)
+
+    return transform_function
+
+
 def get_from_custom_variable(variable_name: str):
     """This built-in function gets from custom_variables the value 'variable_name'.
 
@@ -92,9 +122,8 @@ def get_from_custom_variable(variable_name: str):
     :type variable_name: str
     """
 
-    def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict):
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict,
+                           custom_variables: dict):
         return custom_variables[variable_name]
 
     return transform_function
-
-
