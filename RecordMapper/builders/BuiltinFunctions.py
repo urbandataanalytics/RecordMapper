@@ -1,6 +1,7 @@
 """
 This module defines a set of built-in functions.
 """
+import math
 from datetime import datetime
 
 
@@ -34,11 +35,33 @@ def toInt():
     def transform_function(current_value: object, record: dict, complete_transform_schema: dict,
                            custom_variables: dict):
         value_to_return = None
-        
+
         if current_value is not None:
             try:
                 float_current_value = float(current_value)
-                value_to_return = int(round(float_current_value))
+                value_to_return = int(math.floor(float_current_value))
+            except:
+                value_to_return = None
+
+        return value_to_return
+
+    return transform_function
+
+
+def toRoundedInt(use_floor: bool):
+    """This built-in function casts the current value to Int and returns the result.
+    :param floor: if use the floor method to truncate the value or to use the ceiling if floor is not given
+    :type floor: str
+   """
+
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict,
+                           custom_variables: dict):
+        value_to_return = None
+
+        if current_value is not None:
+            try:
+                float_current_value = float(current_value)
+                value_to_return = int(math.floor(float_current_value)) if use_floor else int(math.ceil(float_current_value))
             except:
                 value_to_return = None
 

@@ -66,7 +66,7 @@ class NestedSchemaSelectorApplier(object):
             if field_data.selector != None and field_data.selector(field_key, record, self.custom_variables) != None else None
 
         # Not schema selected (this field will be null)
-        if nested_schema_name is None:
+        if nested_schema_name == None:
             return flat_schema
 
         # Schema selected. Add their fields to the complete schema
