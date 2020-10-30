@@ -10,7 +10,7 @@ def sum(number_str: str):
 
 def selectSchema(schema_str: str):
 
-    def selectFunction(key, record):
+    def selectFunction(key, record, custom_variables):
         return schema_str
 
     return selectFunction

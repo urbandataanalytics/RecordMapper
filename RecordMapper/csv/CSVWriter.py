@@ -21,6 +21,7 @@ class CSVWriter(Writer):
 
         super().__init__(file_path)
         self.fieldnames = fieldnames
+        self.write_count = 0
 
     def write_records_to_output(self, records: Iterable[dict], output: BinaryIO, output_opts: dict):
         """Writes the records to an output file.
@@ -36,6 +37,7 @@ class CSVWriter(Writer):
 
         for record in records:
             csv_writer.writerow(self.format_record(record, output_opts))
+            self.write_count += 1
 
     def format_record(self, record: dict, output_opts: dict) -> dict:
         """Format a record to be written. For example, dicts will be serialized to

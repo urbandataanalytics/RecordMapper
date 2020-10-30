@@ -77,6 +77,8 @@ class test_RecordMapper(unittest.TestCase):
         recordMapper = RecordMapper(test_schema, [test_nested_schema])
         res_record = recordMapper.transform_record(input_record)
 
+        print(recordMapper.stats)
+
         self.assertDictEqual(res_record, expected_record)
 
     def test_write_with_schemas_for_write(self):
@@ -243,7 +245,7 @@ class test_RecordMapper(unittest.TestCase):
 
         record_mapper = RecordMapper(test_schema, [test_nested_schema])
 
-        record_mapper.execute("csv", "files/test_1.csv", {
+        record_mapper.execute("csv", "tests/files/test_1.csv", {
             "avro": avro_temp_file.name,
             "csv": csv_temp_file.name},
                               output_opts={
@@ -262,6 +264,13 @@ class test_RecordMapper(unittest.TestCase):
         csv_records = list(csv_reader.read_records())
         csv_reader.close()
         self.assertListEqual([dict(x) for x in csv_records], expected_csv_records)
+
+                # Check stats
+        self.assertTrue(
+            record_mapper.stats["read_count"] == \
+            record_mapper.stats["write_count"]["csv"] == \
+            record_mapper.stats["write_count"]["avro"]
+        )
 
         os.remove(avro_temp_file.name)
         os.remove(csv_temp_file.name)
@@ -339,7 +348,7 @@ class test_RecordMapper(unittest.TestCase):
 
         record_mapper = RecordMapper(test_schema, [test_nested_schema])
 
-        record_mapper.execute("csv", "files/test_1.csv", {
+        record_mapper.execute("csv", "tests/files/test_1.csv", {
             "avro": avro_temp_file.name,
             "csv": csv_temp_file.name},
                 output_opts={
@@ -353,6 +362,13 @@ class test_RecordMapper(unittest.TestCase):
         csv_records = list(csv_reader.read_records())
         csv_reader.close()
         self.assertListEqual([dict(x) for x in csv_records], expected_csv_records)
+
+        # Check stats
+        self.assertTrue(
+            record_mapper.stats["read_count"] == \
+            record_mapper.stats["write_count"]["csv"] == \
+            record_mapper.stats["write_count"]["avro"]
+        )
 
         os.remove(avro_temp_file.name)
         os.remove(csv_temp_file.name)

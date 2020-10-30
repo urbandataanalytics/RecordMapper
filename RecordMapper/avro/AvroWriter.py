@@ -27,6 +27,7 @@ class AvroWriter(Writer):
 
         super().__init__(obj_to_write)
         self.write_options = "wb"
+        self.write_count = 0
 
         self.parsed_nested_schemas = [fastavro.parse_schema(schema) for schema in nested_schemas]
 
@@ -46,6 +47,7 @@ class AvroWriter(Writer):
         for record in record_list:
             try:
                 self.writer.write(record)
+                self.write_count += 1
             except ValueError as ex:
                 raise AvroMatchingException(f"Exception: {ex} for row -> {record}")
 

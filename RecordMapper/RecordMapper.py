@@ -27,6 +27,9 @@ class RecordMapper(object):
         self.original_nested_schemas = nested_schemas
         self.custom_variables = custom_variables
 
+        # Stats of the record mapper
+        self.stats = {}
+
         self.flat_schemas = dict(
             [
                 (schema["name"], FlatSchemaBuilder.get_flat_schema(schema))
@@ -57,6 +60,9 @@ class RecordMapper(object):
         :param nested_schemas_to_write: A list of nested record schemas used to write, defaults to None
         :type nested_schemas_to_write: List[dict], optional
         """
+        
+        # Reset stats dict
+        self.stats = {}
 
         read_records = self.read_records(input_format, input_file_path, input_opts)
         transformed_records = self.transform_records(read_records)
@@ -123,6 +129,8 @@ class RecordMapper(object):
         :rtype: Iterator[Iteraror[dict]]
         """
 
+        self.stats["read_count"] = 0
+
         if input_format == "avro":
             reader_object = AvroReader(path_to_read)
         elif input_format == "csv":
@@ -131,6 +139,7 @@ class RecordMapper(object):
             raise RuntimeError(f"Invalid input format: {input_format}")
 
         for record in reader_object.read_records():
+            self.stats["read_count"] += 1
             yield record
 
         reader_object.close()
@@ -152,6 +161,8 @@ class RecordMapper(object):
         :raises RuntimeError: Raises and error if there is not a specified path for the avro format.
         """
 
+        self.stats["write_count"] = {}
+
         base_schema_to_write = self.original_base_schema if base_schema_to_write is None else base_schema_to_write
         nested_schemas_to_write = self.original_nested_schemas if nested_schemas_to_write is None else nested_schemas_to_write
 
@@ -159,14 +170,15 @@ class RecordMapper(object):
             raise RuntimeError("It is necessary a path to write an Avro File")
 
         # Avro writing
-        writer = AvroWriter(
+        writer_avro = AvroWriter(
             paths_to_write["avro"],
             base_schema_to_write,
             nested_schemas_to_write,
             output_opts
         )
-        writer.write_records(records_list, output_opts)
-        writer.close()
+        writer_avro.write_records(records_list, output_opts)
+        self.stats["write_count"]["avro"] = writer_avro.write_count
+        writer_avro.close()
 
         if "csv" in paths_to_write:
 
@@ -185,4 +197,6 @@ class RecordMapper(object):
                 fieldnames += fieldnames_concatenated
 
             records = AvroReader(paths_to_write["avro"]).read_records()
-            CSVWriter(paths_to_write["csv"], fieldnames).write_records(records, output_opts)
+            writer_csv = CSVWriter(paths_to_write["csv"], fieldnames)
+            writer_csv.write_records(records, output_opts)
+            self.stats["write_count"]["csv"] = writer_csv.write_count
