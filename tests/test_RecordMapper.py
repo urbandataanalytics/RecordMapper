@@ -77,8 +77,6 @@ class test_RecordMapper(unittest.TestCase):
         recordMapper = RecordMapper(test_schema, [test_nested_schema])
         res_record = recordMapper.transform_record(input_record)
 
-        print(recordMapper.stats)
-
         self.assertDictEqual(res_record, expected_record)
 
     def test_write_with_schemas_for_write(self):

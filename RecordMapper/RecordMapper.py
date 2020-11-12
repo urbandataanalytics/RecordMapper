@@ -7,6 +7,7 @@ from RecordMapper.avro.AvroWriter import AvroWriter
 from RecordMapper.builders import FlatSchemaBuilder, FlatRecordBuilder
 from RecordMapper.csv.CSVReader import CSVReader
 from RecordMapper.csv.CSVWriter import CSVWriter
+from RecordMapper.xml.XMLReader import XMLReader
 from RecordMapper.utils import chain_functions
 
 
@@ -135,6 +136,8 @@ class RecordMapper(object):
             reader_object = AvroReader(path_to_read)
         elif input_format == "csv":
             reader_object = CSVReader(path_to_read)
+        elif input_format == "xml":
+            reader_object = XMLReader(path_to_read)
         else:
             raise RuntimeError(f"Invalid input format: {input_format}")
 
