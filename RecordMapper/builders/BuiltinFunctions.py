@@ -4,6 +4,8 @@ This module defines a set of built-in functions.
 import math
 from datetime import datetime
 
+import dateparser
+
 
 def copyFrom(path_to_copy_from: str):
     """This built-in function returns the value of 'path_to_copy_from' key.
@@ -148,5 +150,25 @@ def get_from_custom_variable(variable_name: str):
     def transform_function(current_value: object, record: dict, complete_transform_schema: dict,
                            custom_variables: dict):
         return custom_variables[variable_name]
+
+    return transform_function
+
+
+def transform_date_between_formats(input_format: str, output_format: str):
+    """This built-in function transform given date as str from an input_format to an output_format.
+
+    If given input date does not match input format, it will try to parse input date with dateparser.
+    You can force dateparser parsing giving any incorrect input_format like "ignore", anyway  if
+    a correct format does not match the given date, it will use dateparser.
+    """
+
+    def transform_function(current_value: str, record: dict, complete_transform_schema: dict, custom_variables: dict,
+                           is_nested_record: bool = False):
+        if current_value:
+            try:
+                datetime_before_transform = datetime.strptime(current_value, input_format)
+            except ValueError:
+                datetime_before_transform = dateparser.parse(current_value)
+            return datetime.strftime(datetime_before_transform, output_format)
 
     return transform_function
