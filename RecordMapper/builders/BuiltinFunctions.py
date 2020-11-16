@@ -169,6 +169,10 @@ def transform_date_between_formats(input_format: str, output_format: str):
                 datetime_before_transform = datetime.strptime(current_value, input_format)
             except ValueError:
                 datetime_before_transform = dateparser.parse(current_value)
+
+                if datetime_before_transform > datetime.now():
+                    datetime_before_transform = datetime_before_transform.replace(year=datetime_before_transform.year-1)
+
             return datetime.strftime(datetime_before_transform, output_format)
 
     return transform_function
