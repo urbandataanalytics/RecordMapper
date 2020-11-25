@@ -40,7 +40,8 @@ def toInt():
 
         if current_value is not None:
             try:
-                float_current_value = float(current_value)
+                clean_current_value = current_value.replace(",", ".")
+                float_current_value = float(clean_current_value)
                 value_to_return = int(math.floor(float_current_value))
             except:
                 value_to_return = None
