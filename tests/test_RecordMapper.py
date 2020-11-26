@@ -326,7 +326,6 @@ class test_RecordMapper(unittest.TestCase):
                 "field_2": '21',
                 "field_3": "example_1",
                 "field_4": '21',
-                "field_5": None,
                 "nested_field_1": None,
                 "nested_field_2": "example_1"
             },
@@ -335,7 +334,6 @@ class test_RecordMapper(unittest.TestCase):
                 "field_2": '54',
                 "field_3": "example_2",
                 "field_4": '54',
-                "field_5": None,
                 "nested_field_1": None,
                 "nested_field_2": "example_2"
             }
