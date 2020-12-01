@@ -8,11 +8,22 @@ class test_FlatRecordBuilder(unittest.TestCase):
         # Arrange
         input_record = {
             "field_1": 5,
-            "field_2": "test"
+            "field_2": "test",
+            "field_3": {
+                "a": 1,
+                "b": 2
+            }
         }
 
         # act
         res = FlatRecordBuilder.get_flat_record_from_normal_record(input_record)
+
+        self.assertDictEqual(res, {
+            ("field_1",): 5,
+            ("field_2",): "test",
+            ("field_3", "a"): 1,
+            ("field_3", "b"): 2
+        })
 
     def test_get_normal_record_from_flat_record(self):
 
