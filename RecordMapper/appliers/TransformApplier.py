@@ -45,8 +45,21 @@ class TransformApplier(object):
                if phase_index < len(field_data.transforms) and field_data.transforms[phase_index] is not None
             ] 
 
+            # Iterate over the transform functions
             for key, transform_function in transforms_by_key:
-                new_values_in_this_phase[key] = transform_function(new_record.get(key), new_record, flat_schema, self.custom_variables)
+                res = transform_function(new_record.get(key), new_record, flat_schema, self.custom_variables)
+
+                # If res is a single value, it modifies only the current value
+                if type(res) is not tuple:
+                    new_values_in_this_phase[key] = res
+                # If res is a tuple of two values and the second one is a dict, it adds the first one as usually
+                # and the second one as update. 
+                elif type(res) is tuple and len(res) == 2 and type(res[1]) is dict:
+                    new_values_in_this_phase[key] = res[0]
+                    new_values_in_this_phase.update(res[1])
+                # Otherwise, it is not a valid result
+                else:
+                    raise RuntimeError(f"Invalid result in a transform function of the key: '{key}'")
             
             new_record = {**new_record, **new_values_in_this_phase}
 

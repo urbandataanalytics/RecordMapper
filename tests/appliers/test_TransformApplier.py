@@ -102,6 +102,47 @@ class test_TransformApplier(unittest.TestCase):
         self.assertDictEqual(res_record, expected_record)
         self.assertDictEqual(res_schema, test_schema)
 
+    def test_record_transform_function(self):
+
+        test_schema = {
+            ("field_1", ) : FieldData(["string"], [], [], None),
+            ("field_2", ) : FieldData(["int"], [], [None, copyFrom("field_3"), custom_functions_for_tests.collapse_values("field_2", "collapse_dict")], None),
+            ("field_3", ) : FieldData(["int"], [], [], None),
+            ("field_4", ) : FieldData(["int"], [], [], None),
+            ("field_5", ) : FieldData(["int"], [], [custom_functions_for_tests.collapse_values("field_5", "collapse_dict")], None),
+            ("field_6", ) : FieldData(["int"], [], [], None)
+        }
+
+        input_record = {
+            ("field_1",): "hola",
+            ("field_2",): 56,
+            ("field_3",): 7,
+            ("field_4",): 78,
+            ("field_6",): 12
+        }
+
+        expected_record = {
+            ("field_1",): "hola",
+            ("field_2",): None,
+            ("field_3",): 7,
+            ("field_4",): 78,
+            ("field_5",): None,
+            ("field_6",): 12,
+            ("collapse_dict",): {
+                "field_2": 7,
+                "field_5": None
+            }
+        }
+
+        # Act
+        res_record, res_schema = TransformApplier({}).apply(input_record, test_schema)
+
+        print("res_record:", res_record)
+        
+        # Assert
+        self.assertDictEqual(res_record, expected_record)
+        self.assertDictEqual(res_schema, test_schema)
+
     def test_transform_with_nested_schemas(self):
         # Arrange
         test_schema = {
