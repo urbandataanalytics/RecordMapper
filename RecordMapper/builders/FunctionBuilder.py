@@ -1,5 +1,5 @@
 import re
-from typing import Callable, List
+from typing import Callable, List, Union
 from inspect import getmembers, isfunction
 import importlib
 
@@ -15,14 +15,19 @@ class FunctionBuilder(object):
     """A Builder class of functions"""
 
     @staticmethod
-    def parse_function_str(function_str: str) -> Callable[[object, dict], object]:
+    def parse_function_str(function_str: str) -> Union[Callable[[object, dict], object], None]:
         """
-        This function parses a string and generates a function to be used as a transform function
+        This function parses a string and generates a function to be used as a transform function.
+        If function_str is None, it returns None.
         :param function_str: A string that represents a function.
         "type function_str: str
         :return: A transform function.
-        :rtype: Callable[[object, dict], object]
+        :rtype: Union[Callable[[object, dict], object], None]
         """
+
+        if function_str is None:
+            return None
+
         parsed_function = re.match("^([\.\w]+)(?:\(([\w|,%\'-: ]*)\))?$", function_str)
         if not parsed_function:
             raise RuntimeError(f"Invalid name for a transform function: '{function_str}'")
