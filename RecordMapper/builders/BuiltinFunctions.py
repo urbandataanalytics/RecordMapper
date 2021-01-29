@@ -30,6 +30,25 @@ def toNull():
     return transform_function
 
 
+def toFloat():
+    """This built-in function casts the current value to Float and returns the result.
+    """
+
+    def transform_function(current_value: object, record: dict, complete_transform_schema: dict,
+                           custom_variables: dict):
+        value_to_return = None
+
+        if current_value is not None:
+            try:
+                value_to_return = float(current_value)
+            except:
+                value_to_return = None
+
+        return value_to_return
+
+    return transform_function
+
+
 def toInt():
     """This built-in function casts the current value to Int and returns the result.
     """
