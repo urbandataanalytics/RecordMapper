@@ -32,28 +32,34 @@ class CSVWriter(Writer):
         :type output: BinaryIO
         """
 
-        csv_writer = csv.DictWriter(output, fieldnames=self.fieldnames)
+        fields_to_flat = set(output_opts.get("flat_nested_schema_on_csv", dict()).keys())
+
+        available_fieldnames = [
+            fieldname
+            for fieldname in self.fieldnames
+            if fieldname not in fields_to_flat
+        ]
+
+        csv_writer = csv.DictWriter(output, fieldnames=available_fieldnames)
         csv_writer.writeheader()
 
         for record in records:
-            csv_writer.writerow(self.format_record(record, output_opts))
+            csv_writer.writerow(self.format_record(record, fields_to_flat))
             self.write_count += 1
 
-    def format_record(self, record: dict, output_opts: dict) -> dict:
+    def format_record(self, record: dict, fields_to_flat: set) -> dict:
         """Format a record to be written. For example, dicts will be serialized to
         JSON strings.
 
         :param record: A input record.
         :type record: dict
-        :param flatten: Indicates if a dictionary should be writen as regluar fields of the record.
-        :type flatten: boolean
+        :param fields_to_flat: A set of fields that will be flatted.
+        :type flatten: set
         :return: A formatted record to be written.
         :rtype: dict
         """
 
         record_to_write = {**record}
-
-        fields_to_flat = list(output_opts.get("flat_nested_schema_on_csv", dict()).keys())
 
         for key, value in record.items():
             if isinstance(value, dict):

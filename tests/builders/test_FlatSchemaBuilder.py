@@ -37,6 +37,32 @@ class test_FlatSchemaBuilder(unittest.TestCase):
 
         # Assert
         self.assertTrue("Invalid module for a custom function" in str(context.exception))
+
+    def test_get_transform_function_with_null_value(self):
+
+        # Arrange
+        test_type_field = [None]
+
+        # Act
+        res = FlatSchemaBuilder.get_transform_functions_from_field(test_type_field)
+
+        # Assert
+        self.assertEqual(len(res), 1)
+        self.assertTrue(res[0] is None)
+
+    def test_get_transform_function_from_field_in_list_format_with_null_values(self):
+
+        # Arrange
+        test_type_field = [None, "copyFrom(field_x)", None]
+
+        # Act
+        res = FlatSchemaBuilder.get_transform_functions_from_field(test_type_field)
+
+        # Assert
+        self.assertEqual(len(res), 3)
+        self.assertTrue(res[0] is None)
+        self.assertTrue(res[1] is not None)
+        self.assertTrue(res[2] is None)
     
     def test_get_selector_function(self):
 
@@ -67,7 +93,8 @@ class test_FlatSchemaBuilder(unittest.TestCase):
                {"name": "field_2", "type": ["int", "null"]},
                {"name": "field_3", "type": ["Schema1", "Schema2"], "nestedSchemaSelector": "toNull"},
                {"name": "field_4", "type": "int", "transform": ["copyFrom(field_2)"]},
-               {"name": "field_5", "type": "int", "transform": ["copyFrom(field_2)", "toNull"]}
+               {"name": "field_5", "type": "int", "transform": ["copyFrom(field_2)", "toNull"]},
+               {"name": "field_6", "type": "int", "transform": [None, "copyFrom(field_2)", "toNull"]},
             ]
         }
 
@@ -86,6 +113,7 @@ class test_FlatSchemaBuilder(unittest.TestCase):
             (("field_2",), ["int", "null"], [], 0, False),
             (("field_3",), ["Schema1", "Schema2"], [], 0, True),
             (("field_4",), ["int"], [], 1, False),
-            (("field_5",), ["int"], [], 2, False)
+            (("field_5",), ["int"], [], 2, False),
+            (("field_6",), ["int"], [], 3, False)
         ])
 

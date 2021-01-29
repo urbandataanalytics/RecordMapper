@@ -77,8 +77,6 @@ class test_RecordMapper(unittest.TestCase):
         recordMapper = RecordMapper(test_schema, [test_nested_schema])
         res_record = recordMapper.transform_record(input_record)
 
-        print(recordMapper.stats)
-
         self.assertDictEqual(res_record, expected_record)
 
     def test_write_with_schemas_for_write(self):
@@ -328,7 +326,6 @@ class test_RecordMapper(unittest.TestCase):
                 "field_2": '21',
                 "field_3": "example_1",
                 "field_4": '21',
-                "field_5": None,
                 "nested_field_1": None,
                 "nested_field_2": "example_1"
             },
@@ -337,7 +334,6 @@ class test_RecordMapper(unittest.TestCase):
                 "field_2": '54',
                 "field_3": "example_2",
                 "field_4": '54',
-                "field_5": None,
                 "nested_field_1": None,
                 "nested_field_2": "example_2"
             }

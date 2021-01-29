@@ -7,6 +7,7 @@ from RecordMapper.avro.AvroWriter import AvroWriter
 from RecordMapper.builders import FlatSchemaBuilder, FlatRecordBuilder
 from RecordMapper.csv.CSVReader import CSVReader
 from RecordMapper.csv.CSVWriter import CSVWriter
+from RecordMapper.xml.XMLReader import XMLReader
 from RecordMapper.utils import chain_functions
 
 
@@ -91,12 +92,7 @@ class RecordMapper(object):
         """
 
         base_schema_name = self.original_base_schema["name"]
-        nested_schema_name = self.original_nested_schemas[0]["name"]
-
         base_flat_schema = self.flat_schemas[base_schema_name]
-        nested_flat_schema = self.flat_schemas[nested_schema_name]
-
-#        base_flat_schema.update(nested_flat_schema)
 
         flat_record = FlatRecordBuilder.get_flat_record_from_normal_record(record)
 
@@ -135,6 +131,8 @@ class RecordMapper(object):
             reader_object = AvroReader(path_to_read)
         elif input_format == "csv":
             reader_object = CSVReader(path_to_read)
+        elif input_format == "xml":
+            reader_object = XMLReader(path_to_read)
         else:
             raise RuntimeError(f"Invalid input format: {input_format}")
 

@@ -31,7 +31,16 @@ class FlatRecordBuilder(object):
         :return: A flat record.
         :rtype: dict
         """
-        return dict([((key,), value) for key, value in record.items()])
+        res = {}
+        for key, value in record.items():
+            flat_key = (key,)
+            if isinstance(value, dict):
+                subrecord = FlatRecordBuilder.get_flat_record_from_normal_record(value)
+                res.update({flat_key+flat_subkey: subvalue for flat_subkey, subvalue in subrecord.items()})
+            else:
+                res.update({flat_key: value})
+
+        return res 
     
     @staticmethod
     def get_normal_record_from_flat_record(flat_record: dict) -> dict:
