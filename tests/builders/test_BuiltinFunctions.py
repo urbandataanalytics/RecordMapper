@@ -60,13 +60,13 @@ class test_transform_functions(unittest.TestCase):
         res1 = transform_function(input_record["field_1"], input_record, None, {})
         res2 = transform_function(input_record["field_2"], input_record, None, {})
         res3 = transform_function(input_record["field_3"], input_record, None, {})
-        res4 = transform_function(input_record["field_3"], input_record, None, {})
+        res4 = transform_function(input_record["field_4"], input_record, None, {})
 
         # Assert
-        self.assertEqual(expected_results["res_1"], 1.111)
-        self.assertEqual(expected_results["res_2"], 0.0)
-        self.assertEqual(expected_results["res_3"], None)
-        self.assertEqual(expected_results["res_4"], 1.1234567891234568)
+        self.assertEqual(expected_results["res_1"], res1)
+        self.assertEqual(expected_results["res_2"], res2)
+        self.assertEqual(expected_results["res_3"], res3)
+        self.assertEqual(expected_results["res_4"], res4)
 
     def test_get_value_from_custom_variables(self):
 
