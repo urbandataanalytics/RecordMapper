@@ -1,7 +1,7 @@
 [tool]
 [tool.poetry]
 name = "RecordMapper"
-version = "0.5.1"
+version = "0.5.2"
 description = "Transform records using an Avro Schema and custom map functions"
 classifiers = ["License :: OSI Approved :: MIT License"]
 homepage = "https://github.com/urbandataanalytics/RecordMapper"
