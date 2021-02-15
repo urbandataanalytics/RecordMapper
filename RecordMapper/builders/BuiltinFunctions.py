@@ -120,10 +120,13 @@ def toBool(value_for_true: str):
     return transform_function
 
 
-def toDate(format: str):
+def toDate(format: str, fallback_format: str = None):
     """This built-in function casts the current value to Date and returns the result.
 
     :param format: the passed format which will guide the parser to build the datetime correctly
+    :type format: str
+    :param fallback_format: In case of error with format it will try to parse with
+    this fallback_format
     :type format: str
     """
 
@@ -132,7 +135,10 @@ def toDate(format: str):
         if current_value is None:
             return None
         else:
-            date_time_obj = datetime.strptime(current_value, format)
+            try:
+                date_time_obj = datetime.strptime(current_value, format)
+            except ValueError:
+                date_time_obj = datetime.strptime(current_value, fallback_format)
 
             return str(date_time_obj)
 

@@ -84,6 +84,34 @@ class test_transform_functions(unittest.TestCase):
         # Assert
         self.assertEqual(res, 5)
 
+    def test_toDate_without_fallback(self):
+        input_record = {
+            "field_1": "2019-07-17 10:51:57.0"
+        }
+
+        try:
+            transform_function = BuiltinFunctions.toDate("%Y-%m-%d %H:%M:%S")
+            res = transform_function(input_record["field_1"], input_record, None, {})
+        except:
+            assert True
+        else:
+            assert False
+
+    def test_toDate_with_fallback(self):
+        input_record = {
+            "field_1": "2019-07-17 10:51:57.0"
+        }
+
+        try:
+            transform_function = BuiltinFunctions.toDate("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f")
+            res = transform_function(input_record["field_1"], input_record, None, {})
+            assert str(res) == "2019-07-17 10:51:57"
+        except:
+            assert False
+        else:
+            assert True
+
+
 
 
 
