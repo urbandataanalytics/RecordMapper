@@ -138,6 +138,19 @@ class test_transform_functions(unittest.TestCase):
         else:
             assert False
 
+    def test_toDate_successful_with_a_date(self):
+        input_record = {
+            "field_1": "2019-07-17"
+        }
+
+        try:
+            transform_function = BuiltinFunctions.toDate("[%Y-%m-%d %H:%M:%S,%Y-%m-%d %H:%M:%S.%f,%Y-%m-%d]")
+            res = transform_function(input_record["field_1"], input_record, None, {})
+            assert res == "2019-07-17 00:00:00"
+        except:
+            assert False
+        else:
+            assert True
 
 
 
