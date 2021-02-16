@@ -13,7 +13,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setuptools.setup(
     name='RecordMapper',
-    version='0.5.2',
+    version='0.6.1',
     description='Transform records using an Avro Schema and custom map functions',
     long_description=long_description,
     long_description_content_type='text/markdown',
