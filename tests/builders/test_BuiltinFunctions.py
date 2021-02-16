@@ -84,7 +84,7 @@ class test_transform_functions(unittest.TestCase):
         # Assert
         self.assertEqual(res, 5)
 
-    def test_toDate_without_fallback(self):
+    def test_toDate_unsuccessful_unique_value(self):
         input_record = {
             "field_1": "2019-07-17 10:51:57.0"
         }
@@ -97,19 +97,46 @@ class test_transform_functions(unittest.TestCase):
         else:
             assert False
 
-    def test_toDate_with_fallback(self):
+    def test_toDate_successful_unique_value(self):
         input_record = {
             "field_1": "2019-07-17 10:51:57.0"
         }
 
         try:
-            transform_function = BuiltinFunctions.toDate("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f")
+            transform_function = BuiltinFunctions.toDate("%Y-%m-%d %H:%M:%S.%f")
+            res = transform_function(input_record["field_1"], input_record, None, {})
+            assert res == "2019-07-17 10:51:57"
+        except:
+            assert False
+        else:
+            assert True
+
+    def test_toDate_successful_with_list(self):
+        input_record = {
+            "field_1": "2019-07-17 10:51:57.0"
+        }
+
+        try:
+            transform_function = BuiltinFunctions.toDate("[%Y-%m-%d %H:%M:%S,%Y-%m-%d %H:%M:%S.%f]")
             res = transform_function(input_record["field_1"], input_record, None, {})
             assert str(res) == "2019-07-17 10:51:57"
         except:
             assert False
         else:
             assert True
+
+    def test_toDate_unsuccessful_with_list(self):
+        input_record = {
+            "field_1": "2019-07-17"
+        }
+
+        try:
+            transform_function = BuiltinFunctions.toDate("[%Y-%m-%d %H:%M:%S,%Y-%m-%d %H:%M:%S.%f]")
+            res = transform_function(input_record["field_1"], input_record, None, {})
+        except:
+            assert True
+        else:
+            assert False
 
 
 

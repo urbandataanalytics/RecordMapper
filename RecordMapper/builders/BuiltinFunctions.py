@@ -3,6 +3,7 @@ This module defines a set of built-in functions.
 """
 import math
 from datetime import datetime
+from typing import Union, List
 
 import dateparser
 
@@ -120,14 +121,19 @@ def toBool(value_for_true: str):
     return transform_function
 
 
-def toDate(format: str, fallback_format: str = None):
+def parse_date_parameter(value: str) -> List[str]:
+    if value[0] == "[":
+        parsed_value = value[1:-1].split(",")
+        return parsed_value
+    else:
+        return [value]
+
+
+def toDate(formats: Union[str, List[str]]):
     """This built-in function casts the current value to Date and returns the result.
 
-    :param format: the passed format which will guide the parser to build the datetime correctly
-    :type format: str
-    :param fallback_format: In case of error with format it will try to parse with
-    this fallback_format
-    :type format: str
+    :param formats: the passed format which will guide the parser to build the datetime correctly
+    :type formats: Union[str, List[str]]
     """
 
     def transform_function(current_value: object, record: dict, complete_transform_schema: dict, custom_variables: dict,
@@ -135,11 +141,15 @@ def toDate(format: str, fallback_format: str = None):
         if current_value is None:
             return None
         else:
-            try:
-                date_time_obj = datetime.strptime(current_value, format)
-            except ValueError:
-                date_time_obj = datetime.strptime(current_value, fallback_format)
-
+            formats_in_list = parse_date_parameter(formats)
+            for format in formats_in_list[:-1]:
+                try:
+                    date_time_obj = datetime.strptime(current_value, format)
+                except ValueError:
+                    pass
+                else:
+                    return str(date_time_obj)
+            date_time_obj = datetime.strptime(current_value, formats_in_list[-1])
             return str(date_time_obj)
 
     return transform_function
