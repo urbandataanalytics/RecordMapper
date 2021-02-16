@@ -3,7 +3,7 @@ This module defines a set of built-in functions.
 """
 import math
 from datetime import datetime
-from typing import Union, List
+from typing import Union, List, Iterable
 
 import dateparser
 
