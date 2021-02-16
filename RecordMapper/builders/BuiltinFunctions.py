@@ -121,15 +121,7 @@ def toBool(value_for_true: str):
     return transform_function
 
 
-def parse_date_parameter(value: str) -> List[str]:
-    if value[0] == "[":
-        parsed_value = value[1:-1].split(",")
-        return parsed_value
-    else:
-        return [value]
-
-
-def toDate(formats: Union[str, List[str]]):
+def toDate(*formats: Iterable[str]):
     """This built-in function casts the current value to Date and returns the result.
 
     :param formats: the passed format which will guide the parser to build the datetime correctly
@@ -141,15 +133,14 @@ def toDate(formats: Union[str, List[str]]):
         if current_value is None:
             return None
         else:
-            formats_in_list = parse_date_parameter(formats)
-            for format in formats_in_list[:-1]:
+            for format in formats[:-1]:
                 try:
                     date_time_obj = datetime.strptime(current_value, format)
                 except ValueError:
                     pass
                 else:
                     return str(date_time_obj)
-            date_time_obj = datetime.strptime(current_value, formats_in_list[-1])
+            date_time_obj = datetime.strptime(current_value, formats[-1])
             return str(date_time_obj)
 
     return transform_function
