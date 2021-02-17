@@ -3,6 +3,10 @@ from typing import BinaryIO, Iterator
 
 from RecordMapper.common import Reader
 
+
+csv.field_size_limit(100_000_000)
+
+
 class CSVReader(Reader):
     """A object that reads records form an input csv file.
     """
