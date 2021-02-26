@@ -133,15 +133,15 @@ def toDate(*formats: Iterable[str]):
         if current_value is None:
             return None
         else:
-            for format in formats[:-1]:
+            for format in formats:
                 try:
                     date_time_obj = datetime.strptime(current_value, format)
                 except ValueError:
                     pass
                 else:
                     return str(date_time_obj)
-            date_time_obj = datetime.strptime(current_value, formats[-1])
-            return str(date_time_obj)
+
+            return None
 
     return transform_function
 
