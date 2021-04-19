@@ -4,20 +4,20 @@ import fastavro
 
 from RecordMapper.common import Reader
 
-class AvroReader(Reader):
-    """A Record reader from Avro format.
-    """
 
-    def __init__(self, path_to_read: str):
+class AvroReader(Reader):
+    """A Record reader for Avro format."""
+
+    def __init__(self, file_path: str):
         """Constructor of the AvroRecord.
 
-        :param path_to_read: Path of the file to read.
-        :type path_to_read: string
+        :param file_path: Path of the file to read.
+        :type file_path: string
         """
 
-        super().__init__(path_to_read)
-
-        self.read_options ="rb"
+        super().__init__(file_path)
+        self.read_options = "rb"
+        self.reader = None
 
     def read_records_from_input(self, input_stream: BinaryIO) -> Iterator[dict]:
         """Read records from an input stream in avro format.
@@ -28,6 +28,8 @@ class AvroReader(Reader):
         :rtype: Iterator[dict]
         """
 
-        for record in fastavro.reader(input_stream):
+        self.reader = fastavro.reader(input_stream)
+
+        for record in self.reader:
             yield record
 
