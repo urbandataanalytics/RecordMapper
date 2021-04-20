@@ -7,37 +7,38 @@ from RecordMapper.common import Writer
 
 class AvroMatchingException(Exception):
     """
-        Exception when a row is writed to an avro file and it doesn't match with the schema.
+        Exception launched when a row is written to an avro file and it doesn't match the schema.
     """
     pass
 
 
 class AvroWriter(Writer):
-    """This object create a writer that writes avro data into a file-like object.
-    """
+    """A Record writer for Avro format."""
 
     def __init__(self, obj_to_write: object, base_schema: dict, nested_schemas: List[dict] = [], output_opts: dict = {}):
         """AvroWriter constructor
 
-        :param output_stream: The file-like object where data will be writed.
-        :type output_stream: file
-        :param avro_schema: A valid avro schema as a dict.
-        :type avro_schema: dict
+        :param obj_to_write: The file-like object where data will be written.
+        :type obj_to_write: file
+        :param base_schema: A valid avro schema as a dict.
+        :type base_schema: dict
+        :param nested_schemas: A valid avro schema as a dict.
+        :type nested_schemas: dict
+        :param output_opts: A dict-like set of options to be able to handle the
+            behaviour of the output.
+        :type output_opts: dict
         """
 
         super().__init__(obj_to_write)
         self.write_options = "wb"
         self.write_count = 0
-
         self.parsed_nested_schemas = [fastavro.parse_schema(schema) for schema in nested_schemas]
+        self.writer = None
 
         if output_opts.get('merge_schemas', False):
             self.parsed_base_schema = self.merge_schemas(base_schema, nested_schemas)
-
         else:
             self.parsed_base_schema = fastavro.parse_schema(base_schema)
-
-
 
     def write_records_to_output(self, record_list: Iterable, output: BinaryIO, output_opts: dict):
 
@@ -50,13 +51,6 @@ class AvroWriter(Writer):
                 self.write_count += 1
             except ValueError as ex:
                 raise AvroMatchingException(f"Exception: {ex} for row -> {record}")
-
-    def close(self):
-        """Sends the buffer reamining data and closes the output stream
-        """
-
-        self.writer.flush()
-        super().close()
 
     def merge_schemas(self, base_schema: dict, nested_schemas: List[dict]):
 
@@ -71,3 +65,9 @@ class AvroWriter(Writer):
                              for value in type_list]
 
         return res_schema
+
+    def close(self):
+        """Send the buffer remaining data and close the output stream."""
+
+        self.writer.flush()
+        super().close()
