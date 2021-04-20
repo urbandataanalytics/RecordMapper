@@ -3,7 +3,7 @@ import setuptools
 DEPENDENCIES = [
     'coverage==4.5.4',
     'nose==1.3.7',
-    'fastavro==0.23.4',
+    'fastavro==1.4',
     'defusedxml==0.6.0',
     'dateparser==1.0.0'
 ]
@@ -17,7 +17,7 @@ setuptools.setup(
     description='Transform records using an Avro Schema and custom map functions',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    author='UDARealState Data engineering Team',
+    author='uDARealEstate Data Engineering Team',
     url='https://github.com/urbandataanalytics/RecordMapper',
     install_requires=DEPENDENCIES,
     packages=setuptools.find_packages(),
