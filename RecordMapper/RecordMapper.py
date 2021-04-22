@@ -14,13 +14,27 @@ from RecordMapper.utils import chain_functions
 class RecordMapper(object):
     """The main class of this package.
 
-    Include methods to transform data using an Avro Schema and custom functions.
+    Include methods to transform data using an Avro schema and custom functions.
     """
 
     def __init__(self, base_schema: dict, nested_schemas: List[dict] = [], custom_variables: dict = {}):
         """Constructor method of RecordMapper.
 
-        :param base_schema: The base schema in avro format to transform the records.
+        Initialize the base and nested schemas, and the custom variables.
+        Initialize the RecordMapper stats and construct a flattened version
+          of the different schemas loaded.
+        Initialize a set of appliers that will transform the records:
+          - The selector applier, which will modify the base schema if
+            there exist nested schemas to consider.
+          - The rename applier, which will develop a renaming process using
+            the aliases included in the schema.
+          - The transform applier which will apply the record transformations
+            given the transforming functions.
+          - The clean applier, which will filter the output fields to
+            keep only the ones given in the output schema.
+
+
+        :param base_schema: The base schema in Avro format to transform the records.
         :type base_schema: dict
         :param nested_schemas: The schemas of the nested record types. Defaults to [].
         :type nested_schemas: List[dict], optional
@@ -35,7 +49,7 @@ class RecordMapper(object):
         # Initialize the stats of the Record Mapper.
         self.stats = {}
 
-        # Load flatten schemas for both, the base and the nested schemas.
+        # Load flattened schemas for both, base and nested schemas.
         self.flat_schemas = dict(
             [
                 (schema["name"], FlatSchemaBuilder.get_flat_schema(schema))
@@ -73,7 +87,7 @@ class RecordMapper(object):
         :type output_opts: dict
         """
         
-        # Reset the stats dictionary.
+        # Reset the RecordMapper stats.
         self.stats = {}
 
         # Read, transform and write records.
@@ -99,7 +113,15 @@ class RecordMapper(object):
     def transform_record(self, record: dict) -> dict:
         """Apply transformations on a single record.
 
-        Each transform step is defined in an Applier object.
+        The transforming process includes:
+          - Loading the flattened schema.
+          - Converting a given record to a convenient flat format.
+          - Constructing the transforming pipeline chaining the appliers functions.
+          - Applying the record transformation.
+          - De-converting the transformed record from the flat format to the original one.
+          - Returning the transformed record.
+
+        Each transforming step is defined in its correspondent Applier object.
 
         :param record: An input record.
         :type record: dict
@@ -107,11 +129,14 @@ class RecordMapper(object):
         :rtype: dict
         """
 
+        # Load the flattened schema.
         base_schema_name = self.original_base_schema["name"]
         base_flat_schema = self.flat_schemas[base_schema_name]
 
+        # Convert the record to a flat format.
         flat_record = FlatRecordBuilder.get_flat_record_from_normal_record(record)
 
+        # Construct the transforming pipeline.
         all_functions = chain_functions(
             self.selector_applier.apply,
             self.rename_applier.apply,
@@ -119,8 +144,10 @@ class RecordMapper(object):
             self.clean_applier.apply
         )
 
+        # Apply the record transformations.
         transformed_record, transformed_flat_schema = all_functions(flat_record, base_flat_schema)
 
+        # Convert the transformed record to the original format.
         normal_record = FlatRecordBuilder.get_normal_record_from_flat_record(transformed_record)
 
         return normal_record
@@ -134,11 +161,9 @@ class RecordMapper(object):
         :type path_to_read: str
         :param opts: Some special options in the read process. Defaults to {}.
         :type opts: dict, optional
-        :raises RuntimeError: [description]
-        :return: [description]
+        :raises RuntimeError: The format is not supported by the RecordMapper.
+        :yield:
         :rtype: Iteraror[dict]
-        :yield: [description]
-        :rtype: Iterator[Iteraror[dict]]
         """
 
         self.stats["read_count"] = 0
@@ -185,13 +210,16 @@ class RecordMapper(object):
 
         self.stats["write_count"] = {}
 
-        base_schema_to_write = self.original_base_schema if not base_schema_to_write else base_schema_to_write
-        nested_schemas_to_write = self.original_nested_schemas if not nested_schemas_to_write else nested_schemas_to_write
+        # Define the output schema.
+        base_schema_to_write = self.original_base_schema if not base_schema_to_write \
+            else base_schema_to_write
+        nested_schemas_to_write = self.original_nested_schemas if not nested_schemas_to_write \
+            else nested_schemas_to_write
 
         if "avro" not in paths_to_write:
             raise RuntimeError("It is necessary a path to write an Avro File!")
 
-        # Writing the Avro file (mandatory).
+        # Write the Avro file (mandatory).
         writer_avro = AvroWriter(
             paths_to_write["avro"],
             base_schema_to_write,
@@ -202,20 +230,17 @@ class RecordMapper(object):
         self.stats["write_count"]["avro"] = writer_avro.write_count
         writer_avro.close()
 
-        # Writing the csv file (optional).
+        # Write the csv file (optional).
         if "csv" in paths_to_write:
             fieldnames = [field["name"] for field in base_schema_to_write["fields"]]
 
-            ## If we want to consider to flatten the nested schemas:
-            if output_opts.get("flat_nested_schema_on_csv", None) != None:
+            # If requested, flatten the nested schemas.
+            if output_opts.get("flat_nested_schema_on_csv") is not None:
                 keys = output_opts["flat_nested_schema_on_csv"].values()
                 fieldnames_nested = [nested_schema['fields'] for nested_schema in nested_schemas_to_write if
                                      nested_schema['name'] in keys]
-
                 fields_concatenated = list(itertools.chain.from_iterable(fieldnames_nested))
-
                 fieldnames_concatenated = [entry['name'] for entry in fields_concatenated]
-
                 fieldnames += fieldnames_concatenated
 
             records = AvroReader(paths_to_write["avro"]).read_records()
