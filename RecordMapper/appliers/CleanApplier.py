@@ -1,12 +1,12 @@
 
 
-
 class CleanApplier(object):
     """An applier that removes the unused files of a record (using a schema as a reference).
     """
 
     def __init__(self, custom_variables: dict):
         """The constructor of the applier.
+
         :param custom_variables: A dict of custom variables.
         :type custom_variables: dict
         """
@@ -14,8 +14,14 @@ class CleanApplier(object):
         self.custom_variables = custom_variables
 
     def apply(self, flat_record: dict, flat_schema: dict) -> (dict, dict):
-        """The apply of the CleanApplier. Removed unused files in a FlatRecord using
-        a FlatSchema as reference (remove the fields that are not in the schema).
+        """Execute the function of this applier.
+
+        Remove unused fields in a FlatRecord using a FlatSchema as
+        reference. The applier only keeps the fields that are in the
+        given schema, filtering the rest.
+
+        As an applier, the output is the transformed record and schema.
+        In CleanApplier, only the record is transformed.
 
         :param flat_record: The input FlatRecord.
         :type flat_record: dict
@@ -27,10 +33,9 @@ class CleanApplier(object):
         
         new_record = {}
 
-        for key, field_data in flat_schema.items():
+        for field_key, field_data in flat_schema.items():
 
-            if key in flat_record:
-                new_record[key] = flat_record[key]
+            if field_key in flat_record:
+                new_record[field_key] = flat_record[field_key]
         
         return new_record, flat_schema
- 
