@@ -58,11 +58,14 @@ class CSVWriter(Writer):
 
         :param record: A input record.
         :type record: dict
-        :param fields_to_flat: A set of fields that will be flatted.
+        :param fields_to_flat: A set of fields that will be flattened.
         :type fields_to_flat: set
         :return: A formatted record to be written.
         :rtype: dict
         """
+
+        if fields_to_flat:
+            record = self.prepare_nested_fields_to_flatten(record, fields_to_flat)
 
         record_to_write = {**record}
 
@@ -75,3 +78,23 @@ class CSVWriter(Writer):
                     record_to_write[key] = json.dumps(value)
 
         return record_to_write
+
+    def prepare_nested_fields_to_flatten(self, record: dict, fields_to_flat: set) -> dict:
+        """Prepare the nested fields to be flattened in record formatting.
+
+        To properly format a record with nested fields, they must
+        be Python dictionary.
+
+        :param record: The input record.
+        :type record: dict
+        :param fields_to_flat: A set of fields that will be flattened.
+        :type fields_to_flat: set
+        :return: The record after corrections.
+        :rtype: dict
+        """
+
+        for field_to_flat in fields_to_flat:
+            if field_to_flat in record:
+                record[field_to_flat] = record[field_to_flat] if record[field_to_flat] else {}
+
+        return record
