@@ -4,7 +4,7 @@ DEPENDENCIES = [
     'coverage==4.5.4',
     'nose==1.3.7',
     'fastavro==1.4',
-    'defusedxml==0.6.0',
+    'defusedxml==0.7.1',
     'dateparser==1.0.0'
 ]
 
@@ -13,8 +13,8 @@ with open('README.md', encoding='utf-8') as f:
 
 setuptools.setup(
     name='RecordMapper',
-    version='0.6.3',
-    description='Transform records using an Avro Schema and custom map functions',
+    version='0.7',
+    description='Transform records using an Avro schema and custom map functions.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='uDARealEstate Data Engineering Team',
