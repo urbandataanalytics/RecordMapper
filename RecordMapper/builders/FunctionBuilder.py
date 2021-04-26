@@ -7,7 +7,9 @@ from RecordMapper.builders import BuiltinFunctions
 
 
 class InvalidFunctionError(Exception):
-    """An exception that represents an invalid string reference for a function"""
+    """
+        An exception that represents an invalid string reference for a function.
+    """
     pass
 
 
